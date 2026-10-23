@@ -8,6 +8,13 @@ The latest changes, newest first. Already installed? [Update in one command](./u
 
 ## October 2026
 
+### Demo video and security checks
+
+- A 21-second demo of the dashboard is now on the [home page](/).
+- Dependencies are up to date: Python scripts now need yfinance 1.7+ and pandas 3.1+ (uv installs them automatically, with Python 3.11 or newer), and the dashboard uses the latest marked and DOMPurify.
+- Automatic vulnerability checks run on every change and every week. Dashboard libraries are pinned with integrity hashes, so a tampered file won't load.
+- Dashboard polish: the journal shows how many calls are logged before the first review, and the first scan's results no longer sit flush against the search box.
+
 ### Portfolio tab in the dashboard
 
 Add, view and remove holdings in the [dashboard](./guide/dashboard#portfolio). It shows totals per currency, an allocation bar, profit and loss, a warning when one holding gets too big, and today's score for each holding. Click a holding for its full analysis. The buttons, dropdowns and focus outlines across the dashboard were also tidied up.

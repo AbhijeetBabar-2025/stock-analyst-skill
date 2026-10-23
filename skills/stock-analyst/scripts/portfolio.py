@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
-# dependencies = ["yfinance>=0.2.40", "pandas>=2.0"]
+# requires-python = ">=3.11"
+# dependencies = ["yfinance>=1.7", "pandas>=3.1"]
 # ///
 """Track holdings and profit/loss. Stored locally in data/portfolio.json.
 

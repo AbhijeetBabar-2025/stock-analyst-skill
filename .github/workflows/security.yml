@@ -1,0 +1,55 @@
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1' # every Monday, to catch newly published advisories
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  npm-audit:
+    name: Website dependencies (npm audit)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - run: npm ci
+      - name: Full report
+        run: npm audit || true
+      - name: Fail on high or critical
+        run: npm audit --audit-level=high
+
+  pip-audit:
+    name: Skill dependencies (pip-audit)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - name: Resolve the scripts' dependencies
+        run: |
+          for s in score dashboard; do
+            uv export --quiet --script skills/stock-analyst/scripts/$s.py > /tmp/$s.txt
+          done
+      - name: Audit
+        run: |
+          uvx pip-audit --strict -r /tmp/score.txt
+          uvx pip-audit --strict -r /tmp/dashboard.txt
+
+  cdn:
+    name: Dashboard CDN files (integrity + freshness)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: python3 .github/scripts/check_cdn.py

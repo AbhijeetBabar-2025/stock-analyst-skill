@@ -1,4 +1,5 @@
 import Link from '@docusaurus/Link';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import Layout from '@theme/Layout';
 import CodeBlock from '@theme/CodeBlock';
 import Heading from '@theme/Heading';
@@ -60,6 +61,24 @@ function Hero() {
   );
 }
 
+function Demo() {
+  const video = useBaseUrl('/video/stock-analyst-demo.mp4');
+  const poster = useBaseUrl('/video/stock-analyst-demo.jpg');
+  return (
+    <section className={styles.demo}>
+      <div className="container">
+        <Heading as="h2" className={styles.stepsHeading}>See it in action</Heading>
+        <div className={styles.demoFrame}>
+          <video className={styles.demoVideo} controls playsInline preload="metadata" poster={poster}
+            aria-label="21-second demo of the Stock Analyst dashboard: scanning tickers, opening an analysis, the portfolio and the journal">
+            <source src={video} type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Steps() {
   return (
     <section className={styles.steps}>
@@ -91,6 +110,7 @@ export default function Home() {
       description="A stock analyst skill for Claude Code: quick scores, researched reports, portfolio tracking and a journal that learns from past calls.">
       <Hero />
       <main>
+        <Demo />
         <HomepageFeatures />
         <Steps />
       </main>

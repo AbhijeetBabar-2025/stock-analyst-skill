@@ -6,3 +6,6 @@ __pycache__/
 # Personal data must never be committed
 journal.jsonl
 portfolio.json
+
+# /brag video output
+brag-output*/

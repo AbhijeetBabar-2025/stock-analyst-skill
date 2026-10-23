@@ -552,7 +552,7 @@ async function loadJournal() {
     const right = judged.filter((r) => r.outcome === 'right').length;
     $('#hit-rate').innerHTML = judged.length
       ? `<strong>${Math.round((right / judged.length) * 100)}%</strong><span>hit rate, ${right} of ${judged.length} reviewed</span>`
-      : `<strong>-</strong><span>calls are reviewed after ${esc(minAge)} days</span>`;
+      : `<strong>${rows.length}</strong><span>call${rows.length === 1 ? '' : 's'} logged, first review after ${esc(minAge)} days</span>`;
     const outcome = (o) => ({ right: 'pill--up', wrong: 'pill--down' }[o] || 'pill--neutral');
     box.innerHTML = `<table>
       <thead><tr><th>Date</th><th>Symbol</th><th>Call</th><th>Score</th><th>Then</th><th>Now</th>

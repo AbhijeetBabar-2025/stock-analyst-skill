@@ -2,7 +2,7 @@
 
 A stock analyst skill for Claude Code and other AI agents. It learns how you invest and improves from its own track record.
 
-📖 **[Beginner's installation and user guide](https://abhijeetbabar-2025.github.io/stock-analyst-skill/)**
+📖 **[Beginner's installation and user guide](https://abhijeetbabar-2025.github.io/stock-analyst-skill/)** · 🎬 **[21-second demo video](https://abhijeetbabar-2025.github.io/stock-analyst-skill/video/stock-analyst-demo.mp4)**
 
 - **Quick score:** a -100 to +100 score for any Yahoo Finance ticker (US, India `.NS`/`.BO`, London `.L`, crypto `-USD`). It combines 7 factors: valuation, growth, profitability, financial health, momentum, analyst views and earnings surprises.
 - **Full report:** fundamental and technical research with bull and bear cases, valuation and risks, using live web research.
@@ -85,6 +85,15 @@ The documentation site lives in `website/` (Docusaurus). Preview it with `cd web
 uv run --with pytest pytest skills/stock-analyst/tests -q
 python3 skills/stock-analyst/scripts/check_upstream.py   # did the borrowed sources change?
 ```
+
+## Security
+
+- **Automatic checks** (`.github/workflows/security.yml`) run on every push, every pull request and every Monday:
+  - `npm audit` on the docs site fails on high or critical vulnerabilities.
+  - `pip-audit` checks the skill's Python dependencies (yfinance, pandas and everything they pull in).
+  - The dashboard's CDN files are pinned to exact versions with integrity (SRI) hashes. The check fails if a file changes, and warns when a newer version is out.
+- **Dependabot** opens update pull requests for the site's npm packages and the GitHub Actions every week.
+- **The dashboard only listens on 127.0.0.1** and rejects requests from other sites (Host and Origin checks). Saved reports are sanitized with DOMPurify before display.
 
 ## Credits
 

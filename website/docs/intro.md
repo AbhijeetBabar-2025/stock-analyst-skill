@@ -17,6 +17,10 @@ slug: /intro
 
 The assistant then fetches real market data, scores the stock, does research and explains it in plain words.
 
+<video controls playsInline preload="metadata" poster="/stock-analyst-skill/video/stock-analyst-demo.jpg" style={{width: '100%', borderRadius: 16, border: '1px solid var(--sa-border)'}}>
+  <source src="/stock-analyst-skill/video/stock-analyst-demo.mp4" type="video/mp4" />
+</video>
+
 ## What makes it different
 
 Most stock tools forget everything when you close them. This one keeps a **journal** of every call it makes. About a month later it checks how each call turned out, works out what it got wrong, and writes that down as a **lesson**. It reads those lessons, plus what it knows about how *you* invest, before every new analysis. The more you use it, the more it fits you.

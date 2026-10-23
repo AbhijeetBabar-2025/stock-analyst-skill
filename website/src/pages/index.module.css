@@ -44,6 +44,25 @@
   min-width: 0;
 }
 
+.demo {
+  padding: 2rem 0 0;
+}
+
+.demoFrame {
+  border-radius: var(--sa-radius-card);
+  overflow: hidden;
+  border: 1px solid var(--sa-border);
+  box-shadow: var(--sa-shadow-raised);
+  background: #0f0f13;
+  aspect-ratio: 16 / 9;
+}
+
+.demoVideo {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .steps {
   padding: 1rem 0 5rem;
 }
