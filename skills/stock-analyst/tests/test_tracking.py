@@ -35,7 +35,7 @@ def test_judge(mods):
 def test_journal_add_and_list(mods, capsys):
     journal, _ = mods
     journal.cmd_add(Namespace(ticker="aapl", price=200.0, verdict="BUY-lean", score=30.0,
-                              target=None, source="quick", thesis="test"))
+                              target=None, source="quick", thesis="test", benchmark=None))
     entries = journal.load()
     assert len(entries) == 1
     assert entries[0]["ticker"] == "AAPL" and entries[0]["benchmark"] == "SPY"
@@ -46,7 +46,8 @@ def test_journal_add_and_list(mods, capsys):
 def test_benchmark_for_indian_ticker(mods):
     import common
     assert common.benchmark_for("RELIANCE.NS") == "^NSEI"
-    assert common.benchmark_for("BTC-USD") == "BTC-USD"
+    assert common.benchmark_for("ETH-USD") == "BTC-USD"
+    assert common.benchmark_for("BTC-USD") is None  # never compared with itself
 
 
 def test_portfolio_average_cost_and_remove(mods):

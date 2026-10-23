@@ -16,7 +16,7 @@ Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates
 **Before:** read `$D/profile.md` and `$D/lessons.md`, and run `uv run $S/scripts/journal.py list TICKER` for past calls on this ticker. Let them shape the analysis (horizon, style, known blind spots). Mention a past call when one exists ("we said BUY-lean at 180 in March").
 
 **After:** each analysis ends with these steps:
-1. Log the call: `uv run $S/scripts/journal.py add TICKER --price P --verdict V --score S --source quick|report|comparison --thesis "one line"`.
+1. Log the call: `uv run $S/scripts/journal.py add TICKER --price P --verdict V --score S --benchmark B --source quick|report|comparison --thesis "one line"`. Take `B` from the score output's "log with --benchmark" line (`none` means judged on absolute return).
 2. If the user revealed a preference or fact about how they invest, update `$D/profile.md`.
 3. If the user corrected the analysis, add a dated bullet to `$D/lessons.md`.
 
@@ -35,6 +35,12 @@ Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates
 
 **Report mode details:** search the web for current price, latest quarterly results, guidance, news and peers; check them against the script's numbers. Read `references/fundamental-analysis.md`, `technical-analysis.md` and `financial-metrics.md` only as needed. Use the script's score as one input, and when your judgement differs from it, say so and explain why. Always cite sources with dates. Keep the report as long as the profile says the user likes.
 
+## ETFs and funds
+
+Detected automatically (Yahoo fund type, or "ETF"/"BEES" in the name for Indian ETFs) and scored on fund factors instead of company ones: momentum, track record (3y/5y returns), risk (volatility, distance from high), cost (expense ratio vs category) and liquidity (assets, price vs NAV). Comparison index follows the asset class: equity funds vs their market index, US bond funds vs AGG, gold and other commodities on absolute return.
+
+In Report mode, research what drives the asset, not the fund: gold (real yields, dollar, central-bank buying), bonds (rates, inflation), equity funds (index valuation, top holdings). Name cheaper or bigger alternatives tracking the same thing (e.g. GLDM vs GLD). Indian ETFs have no fund data on Yahoo, so get the expense ratio and tracking error from the fund house.
+
 ## Getting better over time
 
 **Review** (offer it when the journal has calls older than 30 days and none were reviewed this month):
@@ -51,7 +57,7 @@ Don't change weights on fewer than 5 reviewed calls; that's noise.
 
 ## Reading the score
 
-The composite runs from -100 to +100, built from 7 factors (valuation, growth, profitability, health, momentum, analysts, earnings), each scored -1 to +1. ≥25 is BUY-lean, ≤-25 is SELL-lean, anything between is HOLD. A BUY-lean becomes "HOLD (wait for earnings)" when earnings are less than 14 days away. Confidence drops when data is missing. Yahoo has thin data for many non-US stocks, so for those lean on web research.
+The composite runs from -100 to +100. Stocks use 7 factors (valuation, growth, profitability, health, momentum, analysts, earnings), each scored -1 to +1. ≥25 is BUY-lean, ≤-25 is SELL-lean, anything between is HOLD. ETFs use the 5 fund factors above, weighted by `etf_weights`. A BUY-lean becomes "HOLD (wait for earnings)" when earnings are less than 14 days away. Confidence drops when data is missing. Yahoo has thin data for many non-US stocks, so for those lean on web research.
 
 ## Common mistakes
 

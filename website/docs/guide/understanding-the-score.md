@@ -51,6 +51,41 @@ New to these terms? See the [Glossary](../glossary).
 | ⚠ Loss-making | The company lost money over the past year |
 | ⚠ Fewer than 3 analysts | Too little professional coverage to trust the analyst factor |
 
+## ETFs and funds
+
+An ETF (like **GLD**, **SPY** or **NIFTYBEES.NS**) is a basket of investments, not a company. It has no profits or analyst ratings, so it gets its own five factors:
+
+| Factor | Weight | What it checks | Good sign |
+|---|---|---|---|
+| **Momentum** | 35 | Price trend, RSI, performance vs. its comparison index | Price above its 200-day average |
+| **Track record** | 15 | Average yearly return over 3 and 5 years | 12-15%+ a year |
+| **Risk** | 20 | How much the price swings, and how far it is below its 52-week high | Calm, close to its high |
+| **Cost** | 15 | Expense ratio (the yearly fee), compared with similar funds | Under 0.10% a year |
+| **Liquidity** | 15 | Fund size, and whether its price matches the value of what it holds (NAV) | Billions in assets, price within 0.2% of NAV |
+
+**What each fund is compared against** depends on what it holds:
+
+| Fund holds | Compared against |
+|---|---|
+| Shares (SPY, QQQ, NIFTYBEES.NS) | Its market index (S&P 500, Nifty 50) |
+| US bonds (TLT, AGG) | AGG, the US bond market |
+| Gold, silver, oil (GLD, GOLDBEES.NS) | Nothing: judged on its own return |
+| Crypto (IBIT) | Bitcoin |
+
+Extra ETF warnings:
+
+| Flag | Meaning |
+|---|---|
+| ⚠ Leveraged or inverse fund | 2x, 3x or "short" funds reset daily and lose value over long holds |
+| ⚠ Bear market | 20% or more below its 52-week high |
+| ⚠ High expense ratio | Fees above 0.75% a year |
+| ⚠ Small fund | Under 100M in assets: more likely to close, wider buy/sell gap |
+| ⚠ Premium / discount to NAV | The price is more than 2% away from the value of its holdings |
+
+:::note Indian ETFs
+Yahoo Finance has no fund data (fees, size, track record) for Indian ETFs such as GOLDBEES.NS. They are scored on price trend and risk only, with low confidence. Check the expense ratio on the fund house's website.
+:::
+
 ## Can I change the weights?
 
-Yes. Just ask Claude, for example: *"I care less about analyst opinions, lower that weight to 5."* Your changes are saved in `~/.stock-analyst/config.json` and survive updates. Claude may also *suggest* changes after [reviews](./journal-and-reviews).
+Yes. Just ask Claude, for example: *"I care less about analyst opinions, lower that weight to 5."* ETF weights work the same way, for example *"for ETFs, care more about cost"*. Your changes are saved in `~/.stock-analyst/config.json` and survive updates. Claude may also *suggest* changes after [reviews](./journal-and-reviews).

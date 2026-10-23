@@ -18,7 +18,7 @@ import sys
 from datetime import date
 
 from common import benchmark_for, import_yfinance, load_config
-from scoring import compute
+from scoring import classify_asset, compute, is_fund
 
 yf = import_yfinance()
 
@@ -60,19 +60,76 @@ def fetch(ticker: str) -> dict:
         info = {}
         notes.append(f"Company info unavailable ({e}); fundamentals skipped")
 
-    de = _num(info, "debtToEquity")
+    price = float(close.iloc[-1])
     m = {
         "ticker": ticker.upper(),
         "name": info.get("shortName") or info.get("longName") or ticker.upper(),
         "currency": info.get("currency", ""),
-        "sector": info.get("sector"),
-        "price": float(close.iloc[-1]),
+        "price": price,
         "high_52w": float(close.max()),
         "low_52w": float(close.min()),
+        "drawdown": price / float(close.max()) - 1,
+        "volatility_1y": float(close.pct_change().std() * 252 ** 0.5) if len(close) > 20 else None,
         "ma50": float(close.tail(50).mean()) if len(close) >= 50 else None,
         "ma200": float(close.tail(200).mean()) if len(close) >= 200 else None,
         "rsi": _rsi(close),
         "return_6m": _return(close, 126),
+    }
+    if is_fund(info.get("quoteType"), m["name"]):
+        m.update(_fund_metrics(t, info, price, notes))
+    else:
+        m.update(_stock_metrics(t, info, notes))
+
+    bench = benchmark_for(ticker, m.get("asset_class"))
+    m["benchmark"] = bench
+    if bench:
+        bench_close = yf.Ticker(bench).history(period="1y", auto_adjust=True)["Close"].dropna()
+        if bench_close.empty:
+            notes.append(f"Benchmark {bench} unavailable; relative strength skipped")
+        else:
+            m["bench_return_6m"] = _return(bench_close, 126)
+
+    m["notes"] = notes
+    return m
+
+
+def _fund_metrics(t, info: dict, price: float, notes: list) -> dict:
+    """ETF data: cost, size, track record. Indian ETFs have none of this on Yahoo."""
+    er = _num(info, "netExpenseRatio")
+    out = {
+        "asset_type": "etf",
+        "asset_class": classify_asset(info.get("category"), info.get("shortName") or info.get("longName")),
+        "category": info.get("category"),
+        "fund_family": info.get("fundFamily"),
+        "expense_ratio": er / 100 if er is not None else None,  # Yahoo reports a percentage
+        "aum": _num(info, "totalAssets"),
+        "yield": _num(info, "yield"),
+        "return_3y": _num(info, "threeYearAverageReturn"),
+        "return_5y": _num(info, "fiveYearAverageReturn"),
+    }
+    nav = _num(info, "navPrice")
+    out["premium"] = price / nav - 1 if nav else None
+    try:
+        ops = t.funds_data.fund_operations
+        row = "Annual Report Expense Ratio"
+        if ops is not None and row in ops.index:
+            own, cat = ops.loc[row].iloc[0], ops.loc[row].get("Category Average")
+            if out["expense_ratio"] is None and own:
+                out["expense_ratio"] = float(own)
+            out["category_expense_ratio"] = float(cat) if cat else None
+    except Exception as e:
+        if out["expense_ratio"] is not None or out["aum"] is not None:
+            notes.append(f"Fund details partly unavailable ({type(e).__name__}); category comparison skipped")
+    if out["expense_ratio"] is None and out["aum"] is None:
+        notes.append("No fund data on Yahoo (common for Indian ETFs); check the expense ratio on the fund's site")
+    return out
+
+
+def _stock_metrics(t, info: dict, notes: list) -> dict:
+    de = _num(info, "debtToEquity")
+    m = {
+        "asset_type": "stock",
+        "sector": info.get("sector"),
         "trailing_pe": _num(info, "trailingPE"),
         "forward_pe": _num(info, "forwardPE"),
         "peg": _num(info, "trailingPegRatio") or _num(info, "pegRatio"),
@@ -88,15 +145,6 @@ def fetch(ticker: str) -> dict:
         "analyst_count": info.get("numberOfAnalystOpinions") or 0,
         "market_cap": _num(info, "marketCap"),
     }
-
-    bench = benchmark_for(ticker)
-    m["benchmark"] = bench
-    if bench.upper() != ticker.upper():
-        bench_close = yf.Ticker(bench).history(period="1y", auto_adjust=True)["Close"].dropna()
-        if bench_close.empty:
-            notes.append(f"Benchmark {bench} unavailable; relative strength skipped")
-        else:
-            m["bench_return_6m"] = _return(bench_close, 126)
 
     try:
         eh = t.earnings_history
@@ -115,8 +163,6 @@ def fetch(ticker: str) -> dict:
                 m["days_to_earnings"] = (upcoming[0] - date.today()).days
     except Exception as e:
         notes.append(f"Earnings calendar unavailable ({type(e).__name__})")
-
-    m["notes"] = notes
     return m
 
 
@@ -132,6 +178,8 @@ def _fmt(v, kind: str = "num") -> str:
         return "n/a"
     if kind == "pct":
         return f"{v * 100:.1f}%"
+    if kind == "pct2":
+        return f"{v * 100:.2f}%"
     return f"{v:,.2f}"
 
 
@@ -143,24 +191,55 @@ def render(m: dict, r: dict) -> str:
         "Factors:",
     ]
     lines += [f"  {k:<14}{_bar(v)}" for k, v in r["factors"].items()]
-    lines += [
-        "",
-        "Key numbers:",
-        f"  P/E trailing {_fmt(m['trailing_pe'])} · forward {_fmt(m['forward_pe'])} · PEG {_fmt(m['peg'])}",
-        f"  Revenue growth {_fmt(m['revenue_growth'], 'pct')} · earnings growth {_fmt(m['earnings_growth'], 'pct')}",
-        f"  Margin {_fmt(m['profit_margin'], 'pct')} · ROE {_fmt(m['roe'], 'pct')} · debt/equity {_fmt(m['debt_to_equity'])}",
-        f"  RSI {_fmt(m['rsi'])} · 50d MA {_fmt(m['ma50'])} · 200d MA {_fmt(m['ma200'])}",
-        f"  52w range {_fmt(m['low_52w'])} – {_fmt(m['high_52w'])} · 6m return {_fmt(m['return_6m'], 'pct')}"
-        + (f" vs {m['benchmark']} {_fmt(m['bench_return_6m'], 'pct')}" if m.get("bench_return_6m") is not None else ""),
-        f"  Analysts: {m['analyst_count']} · rating {_fmt(m['recommendation_mean'])} (1=strong buy) · target {_fmt(m['target_price'])}",
-    ]
-    if m.get("next_earnings"):
-        lines.append(f"  Next earnings: {m['next_earnings']}")
+    lines += ["", "Key numbers:"]
+    if m.get("asset_type") == "etf":
+        lines += _etf_numbers(m)
+    else:
+        lines += _stock_numbers(m)
+    lines.append(
+        "  Judged against: " + (m["benchmark"] if m.get("benchmark") else "none (absolute return)")
+        + f"  → log with --benchmark {m.get('benchmark') or 'none'}"
+    )
     if r["flags"]:
         lines += ["", "Flags:"] + [f"  ⚠ {f}" for f in r["flags"]]
     if m["notes"]:
         lines += ["", "Data gaps:"] + [f"  - {n}" for n in m["notes"]]
     return "\n".join(lines)
+
+
+def _price_numbers(m: dict) -> list[str]:
+    return [
+        f"  RSI {_fmt(m['rsi'])} · 50d MA {_fmt(m['ma50'])} · 200d MA {_fmt(m['ma200'])}",
+        f"  52w range {_fmt(m['low_52w'])} – {_fmt(m['high_52w'])} ({_fmt(m['drawdown'], 'pct')} from high)"
+        f" · 6m return {_fmt(m['return_6m'], 'pct')}"
+        + (f" vs {m['benchmark']} {_fmt(m['bench_return_6m'], 'pct')}" if m.get("bench_return_6m") is not None else ""),
+    ]
+
+
+def _etf_numbers(m: dict) -> list[str]:
+    aum = m.get("aum")
+    return [
+        f"  Fund: {m.get('category') or 'category n/a'} · asset class {m['asset_class']}"
+        + (f" · {m['fund_family']}" if m.get("fund_family") else ""),
+        f"  Expense ratio {_fmt(m.get('expense_ratio'), 'pct2')}"
+        f" (category avg {_fmt(m.get('category_expense_ratio'), 'pct2')})"
+        f" · assets {f'{aum / 1e9:,.1f}B' if aum else 'n/a'} · yield {_fmt(m.get('yield'), 'pct')}",
+        f"  Avg yearly return 3y {_fmt(m.get('return_3y'), 'pct')} · 5y {_fmt(m.get('return_5y'), 'pct')}"
+        f" · volatility {_fmt(m.get('volatility_1y'), 'pct')} · vs NAV {_fmt(m.get('premium'), 'pct')}",
+    ] + _price_numbers(m)
+
+
+def _stock_numbers(m: dict) -> list[str]:
+    lines = [
+        f"  P/E trailing {_fmt(m['trailing_pe'])} · forward {_fmt(m['forward_pe'])} · PEG {_fmt(m['peg'])}",
+        f"  Revenue growth {_fmt(m['revenue_growth'], 'pct')} · earnings growth {_fmt(m['earnings_growth'], 'pct')}",
+        f"  Margin {_fmt(m['profit_margin'], 'pct')} · ROE {_fmt(m['roe'], 'pct')} · debt/equity {_fmt(m['debt_to_equity'])}",
+    ] + _price_numbers(m) + [
+        f"  Analysts: {m['analyst_count']} · rating {_fmt(m['recommendation_mean'])} (1=strong buy) · target {_fmt(m['target_price'])}",
+    ]
+    if m.get("next_earnings"):
+        lines.append(f"  Next earnings: {m['next_earnings']}")
+    return lines
 
 
 def main() -> int:

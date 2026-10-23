@@ -7,6 +7,9 @@ Missing factors are dropped and the remaining weights are renormalised.
 
 from __future__ import annotations
 
+import math
+import re
+
 
 def _clamp(x: float, lo: float = -1.0, hi: float = 1.0) -> float:
     return max(lo, min(hi, x))
@@ -103,6 +106,94 @@ FACTORS = {
 }
 
 
+# ---------- Funds (ETFs) ----------
+# Company factors (P/E, margins, analysts, earnings) don't exist for a fund,
+# so ETFs get their own factor set, weighted by config.json "etf_weights".
+
+_CRYPTO = re.compile(r"digital asset|bitcoin|\bether(eum)?\b|crypto", re.I)
+_COMMODITY = re.compile(r"commodit|precious|\bgold\b|\bsilver\b|\boil\b|natural gas|\bmetals?\b", re.I)
+_BOND = re.compile(r"bond|treasur|government|fixed income|\bmuni|credit|inflation-protected|t-bill", re.I)
+_LEVERAGED = re.compile(r"\b(ultra|ultrapro|inverse|bear)\b|\b-?\d(\.\d)?x\b", re.I)
+
+
+def is_fund(quote_type: str | None, name: str | None) -> bool:
+    """True for ETFs and mutual funds. Yahoo labels Indian ETFs as EQUITY, so check the name too."""
+    if quote_type in ("ETF", "MUTUALFUND"):
+        return True
+    return bool(re.search(r"\bETF\b|BEES\b", name or "", re.I))
+
+
+def classify_asset(category: str | None, name: str | None) -> str:
+    """Rough asset class of a fund: crypto, commodity, bond or equity."""
+    text = f"{category or ''} {name or ''}"
+    for label, pattern in (("crypto", _CRYPTO), ("commodity", _COMMODITY), ("bond", _BOND)):
+        if pattern.search(text):
+            return label
+    return "equity"
+
+
+def track_record(m: dict):
+    return _avg([
+        _scale(m.get("return_3y"), 0.0, 0.15),
+        _scale(m.get("return_5y"), 0.0, 0.12),
+    ])
+
+
+def risk(m: dict):
+    return _avg([
+        _scale(m.get("volatility_1y"), 0.40, 0.10),
+        _scale(m.get("drawdown"), -0.30, 0.0),  # distance below the 52-week high
+    ])
+
+
+def cost(m: dict):
+    er, cat = m.get("expense_ratio"), m.get("category_expense_ratio")
+    return _avg([
+        _scale(er, 0.0075, 0.0005),
+        _scale(er / cat, 1.5, 0.3) if er is not None and cat else None,
+    ])
+
+
+def liquidity(m: dict):
+    aum, prem = m.get("aum"), m.get("premium")
+    return _avg([
+        _scale(math.log10(aum), 8.0, 10.0) if aum else None,  # $100M -> -1, $10B -> +1
+        _scale(abs(prem), 0.02, 0.002) if prem is not None else None,
+    ])
+
+
+ETF_FACTORS = {
+    "momentum": momentum,
+    "track_record": track_record,
+    "risk": risk,
+    "cost": cost,
+    "liquidity": liquidity,
+}
+
+
+def etf_flags(m: dict, cfg: dict) -> list[str]:
+    out = []
+    if _LEVERAGED.search(m.get("name") or ""):
+        out.append("Leveraged or inverse fund: built for days, not months; returns decay over time")
+    dd = m.get("drawdown")
+    if dd is not None and dd <= -0.20:
+        out.append(f"Bear market: {abs(dd):.0%} below its 52-week high")
+    rsi, price, high = m.get("rsi"), m.get("price"), m.get("high_52w")
+    if rsi is not None and rsi > 70 and price and high and price >= 0.95 * high:
+        out.append(f"Overbought: RSI {rsi:.0f} and within 5% of 52-week high")
+    er = m.get("expense_ratio")
+    if er is not None and er > 0.0075:
+        out.append(f"High expense ratio: {er:.2%} a year")
+    aum = m.get("aum")
+    if aum is not None and aum < 1e8:
+        out.append(f"Small fund ({aum / 1e6:.0f}M in assets): higher closure risk and wider spreads")
+    prem = m.get("premium")
+    if prem is not None and abs(prem) > 0.02:
+        side = "premium" if prem > 0 else "discount"
+        out.append(f"Trading at a {abs(prem):.1%} {side} to the value of its holdings (NAV)")
+    return out
+
+
 def flags(m: dict, cfg: dict) -> list[str]:
     out = []
     days = m.get("days_to_earnings")
@@ -124,9 +215,11 @@ def flags(m: dict, cfg: dict) -> list[str]:
 
 
 def compute(m: dict, cfg: dict) -> dict:
-    """Score a metrics dict. `cfg` holds `weights` and `thresholds` (see config.json)."""
-    weights = cfg["weights"]
-    factors = {name: FACTORS[name](m) for name in weights}
+    """Score a metrics dict. `cfg` holds `weights`, `etf_weights` and `thresholds` (see config.json)."""
+    is_etf = m.get("asset_type") == "etf"
+    weights = cfg["etf_weights"] if is_etf else cfg["weights"]
+    table = ETF_FACTORS if is_etf else FACTORS
+    factors = {name: table[name](m) for name in weights}
     used = {k: w for k, w in weights.items() if factors[k] is not None}
     total_w = sum(weights.values())
     coverage = sum(used.values()) / total_w if total_w else 0.0
@@ -142,7 +235,7 @@ def compute(m: dict, cfg: dict) -> dict:
         verdict = "SELL-lean"
     else:
         verdict = "HOLD"
-    found = flags(m, th)
+    found = etf_flags(m, th) if is_etf else flags(m, th)
     if verdict == "BUY-lean" and any(f.startswith("Earnings in") for f in found):
         verdict = "HOLD (wait for earnings)"
 

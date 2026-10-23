@@ -50,6 +50,13 @@ def judge(verdict: str, ret: float, bench_ret: float | None, band: float = 0.03)
     return "right" if abs(excess) <= band else "wrong"
 
 
+def _benchmark(a) -> str | None:
+    """--benchmark from score.py output wins; "none" means judge on absolute return."""
+    if a.benchmark is None:
+        return benchmark_for(a.ticker)
+    return None if a.benchmark.lower() == "none" else a.benchmark
+
+
 def cmd_add(a) -> None:
     entry = {
         "id": f"{date.today().isoformat()}-{a.ticker.upper()}-{len(load()) + 1}",
@@ -61,7 +68,7 @@ def cmd_add(a) -> None:
         "target": a.target,
         "source": a.source,
         "thesis": a.thesis,
-        "benchmark": benchmark_for(a.ticker),
+        "benchmark": _benchmark(a),
     }
     append(entry)
     print(f"Logged {entry['id']}: {entry['verdict']} @ {entry['price']}")
@@ -91,11 +98,13 @@ def cmd_review(a) -> None:
     print(f"{'date':<11}{'ticker':<12}{'call':<24}{'return':>8}{'bench':>8}  outcome")
     for e in due:
         ret = prices[e["ticker"]] / e["price"] - 1
-        bc = yf.Ticker(e["benchmark"]).history(start=e["date"], auto_adjust=True)["Close"].dropna()
-        bench_ret = float(bc.iloc[-1] / bc.iloc[0] - 1) if not bc.empty else None
+        bench_ret = None
+        if e.get("benchmark"):
+            bc = yf.Ticker(e["benchmark"]).history(start=e["date"], auto_adjust=True)["Close"].dropna()
+            bench_ret = float(bc.iloc[-1] / bc.iloc[0] - 1) if not bc.empty else None
         outcome = judge(e["verdict"], ret, bench_ret)
         right += outcome == "right"
-        b = f"{bench_ret * 100:+.1f}%" if bench_ret is not None else "n/a"
+        b = f"{bench_ret * 100:+.1f}%" if bench_ret is not None else "abs" if not e.get("benchmark") else "n/a"
         print(f"{e['date']:<11}{e['ticker']:<12}{e['verdict']:<24}{ret * 100:+7.1f}%{b:>8}  {outcome}")
     print(f"\nHit rate: {right}/{len(due)} ({right / len(due):.0%})")
 
@@ -112,6 +121,7 @@ def main() -> int:
     s.add_argument("--target", type=float, help="price target, if any")
     s.add_argument("--source", default="quick", choices=["quick", "report", "comparison"])
     s.add_argument("--thesis", default="", help="one line: why")
+    s.add_argument("--benchmark", help='index to judge against, as printed by score.py; "none" for absolute return')
     s.set_defaults(fn=cmd_add)
 
     s = sub.add_parser("list", help="show past calls")

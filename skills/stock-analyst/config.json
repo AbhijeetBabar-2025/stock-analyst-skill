@@ -8,6 +8,13 @@
     "analysts": 15,
     "earnings": 10
   },
+  "etf_weights": {
+    "momentum": 35,
+    "track_record": 15,
+    "risk": 20,
+    "cost": 15,
+    "liquidity": 15
+  },
   "thresholds": {
     "buy": 25,
     "sell": -25,

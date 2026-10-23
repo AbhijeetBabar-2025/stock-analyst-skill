@@ -15,13 +15,14 @@ Quick score on NVDA
 How's Tesla looking?
 Score AAPL, MSFT and GOOGL
 Quick look at HDFC Bank
+Score the GLD gold ETF
 ```
 
 ## What you get
 
 - **A score from -100 to +100**, with a verdict: **BUY-lean**, **HOLD** or **SELL-lean**.
 - **Confidence** (high, medium or low), which depends on how much data was available.
-- **Seven factor bars** showing what pushed the score up or down.
+- **Factor bars** (seven for companies, five for ETFs) showing what pushed the score up or down.
 - **Key numbers**: P/E, growth, margins, debt, RSI, moving averages, 52-week range, analyst target.
 - **Flags**: warnings such as upcoming earnings, overbought conditions, heavy debt or losses.
 

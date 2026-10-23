@@ -17,6 +17,8 @@ A **ticker** is a stock's short code, like `AAPL` for Apple. The skill uses **Ya
 | **Crypto** | Add `-USD` | `BTC-USD`, `ETH-USD` | Bitcoin | Price trend only |
 | **Other** | Yahoo suffix | `7203.T` (Tokyo), `SAP.DE` (Germany) | S&P 500 | Varies |
 
+ETFs use the same formats (`GLD`, `SPY`, `GOLDBEES.NS`, `NIFTYBEES.NS`). They're detected automatically and scored differently from companies. See [ETFs and funds](./understanding-the-score#etfs-and-funds).
+
 ## Finding a ticker
 
 1. Go to [finance.yahoo.com](https://finance.yahoo.com).

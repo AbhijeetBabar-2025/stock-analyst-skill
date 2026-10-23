@@ -46,16 +46,28 @@ def load_config() -> dict:
     return cfg
 
 
-def benchmark_for(ticker: str) -> str:
-    """Pick a market index to compare against, based on the ticker's exchange suffix."""
+def benchmark_for(ticker: str, asset_class: str | None = None) -> str | None:
+    """What to compare a ticker against, or None to judge on its own (absolute) return.
+
+    Stocks and equity funds use their market's index. Commodity funds (gold, oil)
+    have no fair index, so they are judged on absolute return. A ticker is never
+    compared with itself.
+    """
     t = ticker.upper()
-    if t.endswith((".NS", ".BO")):
-        return "^NSEI"  # Nifty 50
-    if t.endswith("-USD"):
-        return "BTC-USD"
-    if t.endswith(".L"):
-        return "^FTSE"
-    return "SPY"
+    local = t.endswith((".NS", ".BO", ".L"))
+    if asset_class == "commodity":
+        bench = None
+    elif asset_class == "bond":
+        bench = None if local else "AGG"  # US aggregate bond market
+    elif asset_class == "crypto" or t.endswith("-USD"):
+        bench = "BTC-USD"
+    elif t.endswith((".NS", ".BO")):
+        bench = "^NSEI"  # Nifty 50
+    elif t.endswith(".L"):
+        bench = "^FTSE"
+    else:
+        bench = "SPY"
+    return None if bench == t else bench
 
 
 def import_yfinance():
@@ -63,9 +75,14 @@ def import_yfinance():
 
     The filter is added after the import because importing yfinance resets filters.
     """
+    import logging
+
     import yfinance
 
     warnings.filterwarnings("ignore", module="yfinance")
+    # yfinance logs "HTTP Error 404" when a ticker has no fundamentals (normal for ETFs).
+    # Real failures still surface as exceptions or as notes in the output.
+    logging.getLogger("yfinance").setLevel(logging.CRITICAL)
     return yfinance
 
 

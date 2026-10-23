@@ -6,6 +6,7 @@ A stock analyst skill for Claude Code and other AI agents. It learns how you inv
 
 - **Quick score:** a -100 to +100 score for any Yahoo Finance ticker (US, India `.NS`/`.BO`, London `.L`, crypto `-USD`). It combines 7 factors: valuation, growth, profitability, financial health, momentum, analyst views and earnings surprises.
 - **Full report:** fundamental and technical research with bull and bear cases, valuation and risks, using live web research.
+- **ETFs:** funds (GLD, SPY, TLT, NIFTYBEES.NS) get their own score from momentum, track record, risk, cost and liquidity, and are compared with the right index for their asset class.
 - **Comparison:** puts several tickers side by side and ranks them.
 - **Portfolio tracker:** your holdings with profit/loss and warnings when one holding is too large.
 - **Memory that improves over time:**
@@ -66,6 +67,8 @@ Each factor scores from -1 to +1, and the weighted total is scaled to -100…+10
 - **in between:** HOLD
 - **BUY-lean with earnings under 14 days away:** becomes "HOLD (wait for earnings)"
 - **Missing data:** lowers the confidence label; crypto gets momentum only and is marked "thin data"
+
+ETFs use five fund factors instead (momentum, track record, risk, cost, liquidity). Gold and other commodity funds are judged on absolute return, and US bond funds against AGG.
 
 Default weights are in [`config.json`](skills/stock-analyst/config.json).
 
