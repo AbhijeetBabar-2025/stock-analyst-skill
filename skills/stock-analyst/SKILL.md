@@ -28,7 +28,9 @@ Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates
 | "full report", "deep dive", "should I invest" | **Report**: run Quick first, then follow `references/report-template.md` with web research |
 | "compare X vs Y" | **Comparison**: Quick on all tickers, then the comparison structure in `references/report-template.md` |
 | "my portfolio", "I bought ..." | `uv run $S/scripts/portfolio.py add/remove/show` |
+| "show my journal", "what did we say about X" | `uv run $S/scripts/journal.py list [TICKER]` |
 | "how did our calls do", "review" | **Review** (below) |
+| "lower the weight of X", "I care less about Y" | Write just that change to `$D/config.json`, then log it in `$D/changes.md` |
 | "update the skill", "check for upstream changes" | **Upstream** (below) |
 
 **Report mode details:** search the web for current price, latest quarterly results, guidance, news and peers; check them against the script's numbers. Read `references/fundamental-analysis.md`, `technical-analysis.md` and `financial-metrics.md` only as needed. Use the script's score as one input, and when your judgement differs from it, say so and explain why. Always cite sources with dates. Keep the report as long as the profile says the user likes.

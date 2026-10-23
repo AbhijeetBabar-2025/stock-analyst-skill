@@ -1,0 +1,77 @@
+---
+title: 3. Install Node.js and uv
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Step 3: Install Node.js and uv
+
+Two small free tools are needed:
+
+- **Node.js** gives you the `npx` command used to install the skill.
+- **uv** runs the skill's Python programs and downloads what they need automatically. You don't need to install Python yourself.
+
+## Check whether you already have them
+
+Paste these into your terminal one at a time:
+
+```bash
+node --version
+```
+
+```bash
+uv --version
+```
+
+If you see a version number (like `v22.11.0` or `uv 0.9.0`), that tool is installed and you can skip its section below. If you see "command not found" or "not recognized", install it.
+
+:::note Node.js version
+You need Node.js **version 18 or newer**. If `node --version` shows `v16` or lower, install the latest one.
+:::
+
+## Install Node.js
+
+1. Go to **[nodejs.org](https://nodejs.org/)**.
+2. Click the big **LTS** download button. LTS means the stable version.
+3. Open the downloaded file and click through the installer, accepting the defaults.
+4. **Close your terminal and open a new one.**
+5. Check it worked: `node --version` should now show a version number.
+
+## Install uv
+
+<Tabs groupId="os">
+<TabItem value="mac" label="Mac" default>
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+In **PowerShell**:
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+</TabItem>
+</Tabs>
+
+Then **close your terminal and open a new one**, and check:
+
+```bash
+uv --version
+```
+
+If the install commands change, the official instructions are at [docs.astral.sh/uv](https://docs.astral.sh/uv/getting-started/installation/).
+
+**Next:** [Install the skill →](./install-skill)

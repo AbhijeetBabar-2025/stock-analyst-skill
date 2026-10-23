@@ -1,0 +1,58 @@
+---
+title: 2. Install Claude Code
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# Step 2: Install Claude Code
+
+Claude Code is the AI assistant that will use the skill. If you already have it, skip to [step 3](./install-tools).
+
+## Install it
+
+Open your terminal (see [Step 1](./what-you-need#a-word-about-the-terminal) if you're not sure how), then copy and paste the command for your computer:
+
+<Tabs groupId="os">
+<TabItem value="mac" label="Mac" default>
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+</TabItem>
+<TabItem value="windows" label="Windows">
+
+In **PowerShell**:
+
+```powershell
+irm https://claude.ai/install.ps1 | iex
+```
+
+</TabItem>
+<TabItem value="linux" label="Linux">
+
+```bash
+curl -fsSL https://claude.ai/install.sh | bash
+```
+
+</TabItem>
+</Tabs>
+
+When it finishes, **close the terminal and open a new one**. This makes your computer notice the newly installed program.
+
+## Sign in
+
+In the new terminal, type:
+
+```bash
+claude
+```
+
+The first time, it opens your web browser so you can sign in with your Claude account. Follow the steps on screen. When you see a prompt where you can type a message, Claude Code is working. Type `/exit` and press <kbd>Enter</kbd> to leave for now.
+
+:::info Install instructions change
+If the commands above don't work, follow the official guide at [docs.claude.com/en/docs/claude-code/setup](https://docs.claude.com/en/docs/claude-code/setup). It's always up to date.
+:::
+
+**Next:** [Install Node.js and uv →](./install-tools)
