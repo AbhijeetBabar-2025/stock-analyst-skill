@@ -15,6 +15,7 @@ Everything personal is stored **only on your computer**, in a folder called `.st
 | `lessons.md` | What reviews and your corrections taught it |
 | `journal.jsonl` | Every call: date, price, verdict, reason |
 | `portfolio.json` | Your holdings |
+| `watchlist.json` | Symbols saved in the dashboard |
 | `config.json` | Your custom factor weights (only if you changed any) |
 | `changes.md` | A history of weight changes |
 

@@ -3,6 +3,8 @@
 Every change to this skill's behaviour (weights, thresholds, workflow, scripts), newest first.
 
 ## 2026-10-23
+- Dashboard: `scripts/dashboard.py` serves a local web UI (127.0.0.1:8787) to scan symbols
+  as cards, save a watchlist, log calls and browse the journal with returns and outcomes.
 - ETF support: funds are detected and scored on momentum, track record, risk, cost and
   liquidity (`etf_weights`). Comparison index follows asset class (commodities on absolute
   return, US bonds vs AGG). New ETF flags: leveraged/inverse, bear market, high fees, small

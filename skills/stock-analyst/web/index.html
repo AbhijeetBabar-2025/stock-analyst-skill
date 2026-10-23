@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stock Analyst</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%236b2fe0'/%3E%3Cpolyline points='12,44 24,32 33,38 50,18' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist@5.3.0/index.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource-variable/geist-mono@5.3.0/index.css">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <link rel="stylesheet" href="/app.css">
+  <script>
+    // Pick the theme before first paint: saved choice, else the system setting.
+    (function () {
+      var t = null;
+      try { t = localStorage.getItem('sa-theme'); } catch (e) {}
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    })();
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#scanner">
+        <span class="brand__mark"><i class="ph-bold ph-trend-up"></i></span>
+        Stock Analyst
+      </a>
+      <nav class="tabs" role="tablist">
+        <a class="tab" href="#scanner" data-view="scanner" role="tab">Scanner</a>
+        <a class="tab" href="#journal" data-view="journal" role="tab">Journal</a>
+      </nav>
+      <button class="icon-btn" id="theme" aria-label="Toggle light and dark mode">
+        <i class="ph ph-circle-half"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section id="view-scanner" class="view">
+      <div class="panel search">
+        <label class="search__label" for="ticker-input">Symbols to scan</label>
+        <div class="search__row">
+          <div class="chips" id="chips">
+            <input id="ticker-input" autocomplete="off" spellcheck="false"
+                   placeholder="Type a symbol and press Enter, e.g. AAPL, GLD, RELIANCE.NS">
+          </div>
+          <button class="btn btn--primary" id="scan-btn">
+            <i class="ph-bold ph-magnifying-glass"></i> Scan
+          </button>
+        </div>
+        <div class="search__foot">
+          <span class="muted">Try</span>
+          <div class="suggest" id="suggest"></div>
+          <span class="muted search__hint" id="hint"></span>
+        </div>
+      </div>
+
+      <div class="toolbar" id="toolbar" hidden>
+        <div class="summary" id="summary"></div>
+        <label class="sort">
+          <span class="muted">Sort by</span>
+          <select id="sort">
+            <option value="score">Score</option>
+            <option value="momentum">Momentum</option>
+            <option value="ticker">Symbol</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="grid" id="results"></div>
+
+      <div class="empty" id="empty">
+        <i class="ph ph-chart-line-up"></i>
+        <h2>Scan your first stock</h2>
+        <p>Add symbols above and press Scan. Your list is saved for next time.</p>
+      </div>
+    </section>
+
+    <section id="view-journal" class="view" hidden>
+      <div class="journal-head">
+        <div>
+          <h1>Journal</h1>
+          <p class="muted">Every call the skill logged, and how it has done since.</p>
+        </div>
+        <div class="stat" id="hit-rate"></div>
+      </div>
+      <div class="notes" id="journal-notes"></div>
+      <div class="panel table-wrap" id="journal"></div>
+    </section>
+
+    <p class="disclaimer">Research tool, not financial advice. Data from Yahoo Finance, which can be delayed or incomplete.</p>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -57,8 +57,9 @@ def _benchmark(a) -> str | None:
     return None if a.benchmark.lower() == "none" else a.benchmark
 
 
-def cmd_add(a) -> None:
-    entry = {
+def new_entry(a) -> dict:
+    """Build a journal entry from add-style arguments (shared with the dashboard)."""
+    return {
         "id": f"{date.today().isoformat()}-{a.ticker.upper()}-{len(load()) + 1}",
         "date": date.today().isoformat(),
         "ticker": a.ticker.upper(),
@@ -70,6 +71,10 @@ def cmd_add(a) -> None:
         "thesis": a.thesis,
         "benchmark": _benchmark(a),
     }
+
+
+def cmd_add(a) -> None:
+    entry = new_entry(a)
     append(entry)
     print(f"Logged {entry['id']}: {entry['verdict']} @ {entry['price']}")
 

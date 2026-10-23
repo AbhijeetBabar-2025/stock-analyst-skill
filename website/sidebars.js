@@ -28,6 +28,7 @@ const sidebars = {
         'guide/journal-and-reviews',
         'guide/tickers',
         'guide/understanding-the-score',
+        'guide/dashboard',
       ],
     },
     'your-data',

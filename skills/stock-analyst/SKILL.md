@@ -9,7 +9,7 @@ A personal stock analyst that gets better with use. It has a quick numeric score
 
 `$S` below is this skill's base directory. Scripts run with `uv run`, which installs yfinance on the fly (needs [uv](https://docs.astral.sh/uv/)). Tickers are Yahoo symbols: `AAPL`, `RELIANCE.NS`, `TCS.BO`, `BTC-USD`.
 
-Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates never wipe it. That folder holds `profile.md`, `lessons.md`, `journal.jsonl`, `portfolio.json`, optional `config.json` overrides and `changes.md`. On first use run `python3 $S/scripts/common.py` to create it.
+Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates never wipe it. That folder holds `profile.md`, `lessons.md`, `journal.jsonl`, `portfolio.json`, `watchlist.json` (dashboard), optional `config.json` overrides and `changes.md`. On first use run `python3 $S/scripts/common.py` to create it.
 
 ## Every time: before and after
 
@@ -31,6 +31,7 @@ Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates
 | "show my journal", "what did we say about X" | `uv run $S/scripts/journal.py list [TICKER]` |
 | "how did our calls do", "review" | **Review** (below) |
 | "lower the weight of X", "I care less about Y" | Write just that change to `$D/config.json`, then log it in `$D/changes.md` |
+| "open the dashboard", "show me in the browser" | Start `uv run $S/scripts/dashboard.py --open` in the background and give the user http://127.0.0.1:8787 (stop it when they're done) |
 | "update the skill", "check for upstream changes" | **Upstream** (below) |
 
 **Report mode details:** search the web for current price, latest quarterly results, guidance, news and peers; check them against the script's numbers. Read `references/fundamental-analysis.md`, `technical-analysis.md` and `financial-metrics.md` only as needed. Use the script's score as one input, and when your judgement differs from it, say so and explain why. Always cite sources with dates. Keep the report as long as the profile says the user likes.
