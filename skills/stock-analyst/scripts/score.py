@@ -47,13 +47,13 @@ def fetch(ticker: str) -> dict:
     """Collect everything the scorer needs. Gaps are recorded in `notes`, not hidden."""
     notes = []
     t = yf.Ticker(ticker)
-    hist = t.history(period="1y", auto_adjust=True)
-    if hist.empty:
+    # Yahoo can return a trailing row with no close (e.g. Indian stocks mid-session); drop it.
+    close = t.history(period="1y", auto_adjust=True)["Close"].dropna()
+    if close.empty:
         raise LookupError(
             f"No price history for {ticker!r}. Check the symbol "
             "(Indian stocks need .NS or .BO, e.g. RELIANCE.NS; crypto needs -USD)."
         )
-    close = hist["Close"]
     try:
         info = t.info or {}
     except Exception as e:  # Yahoo sometimes rate-limits the info endpoint
@@ -92,11 +92,11 @@ def fetch(ticker: str) -> dict:
     bench = benchmark_for(ticker)
     m["benchmark"] = bench
     if bench.upper() != ticker.upper():
-        bh = yf.Ticker(bench).history(period="1y", auto_adjust=True)
-        if bh.empty:
+        bench_close = yf.Ticker(bench).history(period="1y", auto_adjust=True)["Close"].dropna()
+        if bench_close.empty:
             notes.append(f"Benchmark {bench} unavailable; relative strength skipped")
         else:
-            m["bench_return_6m"] = _return(bh["Close"], 126)
+            m["bench_return_6m"] = _return(bench_close, 126)
 
     try:
         eh = t.earnings_history

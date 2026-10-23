@@ -91,8 +91,8 @@ def cmd_review(a) -> None:
     print(f"{'date':<11}{'ticker':<12}{'call':<24}{'return':>8}{'bench':>8}  outcome")
     for e in due:
         ret = prices[e["ticker"]] / e["price"] - 1
-        bh = yf.Ticker(e["benchmark"]).history(start=e["date"], auto_adjust=True)
-        bench_ret = float(bh["Close"].iloc[-1] / bh["Close"].iloc[0] - 1) if not bh.empty else None
+        bc = yf.Ticker(e["benchmark"]).history(start=e["date"], auto_adjust=True)["Close"].dropna()
+        bench_ret = float(bc.iloc[-1] / bc.iloc[0] - 1) if not bc.empty else None
         outcome = judge(e["verdict"], ret, bench_ret)
         right += outcome == "right"
         b = f"{bench_ret * 100:+.1f}%" if bench_ret is not None else "n/a"

@@ -74,10 +74,10 @@ def latest_prices(tickers: list[str]) -> dict[str, float]:
     yf = import_yfinance()
     out = {}
     for t in tickers:
-        hist = yf.Ticker(t).history(period="5d", auto_adjust=True)
-        if hist.empty:
+        close = yf.Ticker(t).history(period="5d", auto_adjust=True)["Close"].dropna()
+        if close.empty:
             raise LookupError(f"No recent price for {t!r} from Yahoo Finance; check the symbol or try again later")
-        out[t] = float(hist["Close"].iloc[-1])
+        out[t] = float(close.iloc[-1])
     return out
 
 
