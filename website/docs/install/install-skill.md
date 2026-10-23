@@ -6,6 +6,16 @@ title: 4. Install the skill
 
 This is the easy part: one command.
 
+:::info Already installed?
+You don't need to install again. Update to the latest version instead:
+
+```bash
+npx skills update stock-analyst -g -y
+```
+
+Your journal, portfolio and reports are kept. See [What's new](../whats-new) for the changes.
+:::
+
 ## Install
 
 Paste this into your terminal:

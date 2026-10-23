@@ -73,6 +73,8 @@ def fetch(ticker: str) -> dict:
         "ma50": float(close.tail(50).mean()) if len(close) >= 50 else None,
         "ma200": float(close.tail(200).mean()) if len(close) >= 200 else None,
         "rsi": _rsi(close),
+        "return_1m": _return(close, 21),
+        "return_3m": _return(close, 63),
         "return_6m": _return(close, 126),
     }
     if is_fund(info.get("quoteType"), m["name"]):

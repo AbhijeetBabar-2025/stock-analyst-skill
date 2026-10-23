@@ -77,3 +77,36 @@ def test_watchlist_roundtrip(dash):
     assert dash.load_watchlist() == []
     dash.save_watchlist(["aapl", "GLD", "AAPL", "bad$$"])
     assert dash.load_watchlist() == ["AAPL", "GLD"]
+
+
+RSS = """<?xml version="1.0"?><rss><channel>
+<item><title>Gold slides as oil jumps - Reuters</title><link>https://news.google.com/a</link>
+<pubDate>Thu, 22 Oct 2026 10:00:00 GMT</pubDate><source url="https://reuters.com">Reuters</source></item>
+<item><title>Newer story - CNBC</title><link>https://news.google.com/b</link>
+<pubDate>Fri, 23 Oct 2026 09:00:00 GMT</pubDate><source url="https://cnbc.com">CNBC</source></item>
+<item><title>Bad link</title><link>javascript:alert(1)</link><pubDate>Fri, 23 Oct 2026 08:00:00 GMT</pubDate></item>
+</channel></rss>"""
+
+
+def test_parse_rss_sorts_cleans_and_drops_unsafe_links(dash):
+    items = dash.parse_rss(RSS)
+    assert [i["title"] for i in items] == ["Newer story", "Gold slides as oil jumps"]
+    assert items[0]["source"] == "CNBC" and items[0]["date"] == "2026-10-23"
+    assert all(i["url"].startswith("https://") for i in items)
+
+
+def test_news_query(dash):
+    assert dash.news_query("Apple Inc.", "AAPL", "stock") == "Apple AAPL stock"
+    assert dash.news_query("RELIANCE INDUSTRIES LTD", "RELIANCE.NS", "stock") == "RELIANCE INDUSTRIES RELIANCE stock"
+    assert dash.news_query("SPDR Gold Shares", "GLD", "etf") == "SPDR Gold Shares GLD etf"
+
+
+def test_latest_report_picks_newest_for_that_ticker(dash, tmp_path):
+    reports = tmp_path / "reports"
+    reports.mkdir()
+    (reports / "GLD-2026-09-01.md").write_text("old")
+    (reports / "GLD-2026-10-23.md").write_text("# new")
+    (reports / "GLDM-2026-12-01.md").write_text("other ticker")
+    r = dash.latest_report("GLD")
+    assert r == {"date": "2026-10-23", "markdown": "# new"}
+    assert dash.latest_report("AAPL") is None

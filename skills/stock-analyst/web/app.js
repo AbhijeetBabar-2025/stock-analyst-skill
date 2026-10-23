@@ -194,6 +194,12 @@ function renderResults() {
   ].join('');
   $('#results').innerHTML = list.map((r) => (r.ok ? card(r) : errorCard(r.ticker, r.error))).join('');
   $('#results').querySelectorAll('[data-act]').forEach((b) => b.addEventListener('click', onCardAction));
+  $('#results').querySelectorAll('.card--click').forEach((c) => {
+    c.addEventListener('click', (e) => { if (!e.target.closest('button')) openDetail(c.dataset.ticker); });
+    c.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === c) { e.preventDefault(); openDetail(c.dataset.ticker); }
+    });
+  });
 }
 
 // ---------- cards ----------
@@ -244,9 +250,9 @@ function card(r) {
       <span class="factor__value ${v == null ? 'na' : v < 0 ? 'neg' : ''}">${v == null ? 'n/a' : (v > 0 ? '+' : '') + v.toFixed(2)}</span>
     </li>`).join('');
   const flags = s.flags.map((f) => `<span class="pill pill--warn"><i class="ph ph-warning"></i>${esc(f)}</span>`).join('');
-  const gaps = (m.notes || []).map((n) => `<li>${esc(n)}</li>`).join('');
   return `
-  <article class="card" data-ticker="${esc(r.ticker)}">
+  <article class="card card--click" data-ticker="${esc(r.ticker)}" tabindex="0"
+           aria-label="Open analysis for ${esc(r.ticker)}">
     <div class="card__head">
       <div class="mark" aria-hidden="true">${esc(r.ticker.replace('^', '')[0])}</div>
       <div style="min-width:0">
@@ -268,11 +274,10 @@ function card(r) {
       <ul class="factors">${factors}</ul>
     </div>
     ${flags ? `<div class="flags">${flags}</div>` : ''}
-    <div class="details">${keyNumbers({ ...m, scanned_at: r.scanned_at })}${gaps ? `<ul class="gaps">${gaps}</ul>` : ''}</div>
     <div class="card__foot">
       <span class="pill pill--accent">Confidence ${esc(s.confidence)}</span>
       <span class="spacer"></span>
-      <button class="btn btn--small btn--ghost" data-act="details">Details</button>
+      <span class="open-hint">Open analysis <i class="ph ph-arrow-right"></i></span>
       <button class="btn btn--small" data-act="log"><i class="ph ph-notebook"></i> Log call</button>
     </div>
   </article>`;
@@ -294,14 +299,10 @@ function skeleton() {
 }
 
 async function onCardAction(e) {
+  e.stopPropagation();
   const btn = e.currentTarget;
-  const el = btn.closest('.card');
-  if (btn.dataset.act === 'details') {
-    el.classList.toggle('open');
-    btn.textContent = el.classList.contains('open') ? 'Hide' : 'Details';
-    return;
-  }
-  const r = state.results.find((x) => x.ticker === el.dataset.ticker);
+  const el = btn.closest('[data-ticker]');
+  const r = state.results.find((x) => x.ticker === el.dataset.ticker) || state.detail;
   btn.disabled = true;
   try {
     const { entry } = await api('/api/journal', {
@@ -318,6 +319,96 @@ async function onCardAction(e) {
     btn.disabled = false;
     toast(`Couldn't log: ${err.message}`);
   }
+}
+
+// ---------- detail drawer ----------
+const drawer = $('#drawer');
+let lastFocus = null;
+let hideTimer = null; // pending hide from the close animation
+
+function list(items, cls = '') {
+  return `<ul class="blist ${cls}">${items.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`;
+}
+
+function section(icon, title, body, extra = '') {
+  return `<section class="dsec ${extra}"><h3><i class="ph ${icon}"></i>${esc(title)}</h3>${body}</section>`;
+}
+
+function renderMarkdown(md) {
+  if (window.marked && window.DOMPurify) {
+    return DOMPurify.sanitize(marked.parse(md), { USE_PROFILES: { html: true } });
+  }
+  return `<pre class="raw">${esc(md)}</pre>`; // libraries failed to load: show plain text
+}
+
+async function openDetail(ticker) {
+  lastFocus = document.activeElement;
+  clearTimeout(hideTimer); // reopening during the close animation must not get hidden
+  drawer.hidden = false;
+  document.body.classList.add('locked');
+  requestAnimationFrame(() => drawer.classList.add('open'));
+  $('#drawer-body').innerHTML = `<div class="dskel">${'<div class="sk" style="height:16px"></div>'.repeat(10)}</div>`;
+  $('#drawer-title').textContent = ticker;
+  $('#drawer-close').focus();
+  try {
+    const d = await api(`/api/detail?t=${encodeURIComponent(ticker)}`);
+    if (!d.ok) throw new Error(d.error);
+    state.detail = d;
+    renderDetail(d);
+  } catch (e) {
+    $('#drawer-body').innerHTML = errorCard(`Couldn't load ${ticker}`, e.message);
+  }
+}
+
+function closeDetail() {
+  drawer.classList.remove('open');
+  document.body.classList.remove('locked');
+  hideTimer = setTimeout(() => { drawer.hidden = true; }, 200);
+  if (lastFocus) lastFocus.focus();
+}
+
+$('#drawer-close').addEventListener('click', closeDetail);
+$('#drawer-backdrop').addEventListener('click', closeDetail);
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !drawer.hidden) closeDetail(); });
+
+function renderDetail(d) {
+  const { metrics: m, result: s, brief: b } = d;
+  $('#drawer-title').innerHTML = `${esc(d.ticker)} <span class="pill pill--neutral">${m.asset_type === 'etf' ? 'ETF' : 'Stock'}</span>`;
+  const headlines = d.news.length
+    ? `<ul class="news">${d.news.map((n) => `<li><a href="${esc(n.url)}" target="_blank" rel="noopener noreferrer">${esc(n.title)}</a>
+        <span class="muted">${esc(n.source)}${n.date ? `, ${esc(n.date)}` : ''}</span></li>`).join('')}</ul>`
+    : `<p class="muted">${esc(d.news_error || 'No headlines in the last 7 days.')}</p>`;
+  const watch = `<ul class="watch">${b.watch.map((w) => `<li><strong>${esc(w.what)}</strong><span>${esc(w.why)}</span></li>`).join('')}</ul>`;
+  const report = d.report
+    ? `<div class="report">${renderMarkdown(d.report.markdown)}</div>`
+    : `<div class="report-empty"><p>No full report saved for ${esc(d.ticker)} yet.</p>
+        <p>Ask Claude: <code>full report on ${esc(d.ticker)}</code>. It will appear here.</p></div>`;
+  $('#drawer-body').innerHTML = `
+    <div class="dhead">
+      <div><div class="dname">${esc(m.name)}</div>
+        <div class="dprice">${esc(money(m.price, m.currency))}
+          <span class="pill ${(m.return_6m ?? 0) >= 0 ? 'pill--up' : 'pill--down'}">${esc(pct(m.return_6m))} 6m</span></div></div>
+      <div class="dscore">${gauge(s.composite)}<div class="score__num">${s.composite > 0 ? '+' : ''}${Math.round(s.composite)}</div>
+        <span class="pill ${verdictClass(s.verdict)}">${esc(s.verdict)}</span></div>
+    </div>
+    <p class="dsummary">${esc(b.summary)}</p>
+    ${section('ph-trend-up', "Why it's moving", list(b.why_moving))}
+    ${section('ph-newspaper', 'Latest headlines', headlines)}
+    <div class="cases">
+      ${section('ph-arrow-up-right', 'Bull case', list(b.bull), 'dsec--bull')}
+      ${section('ph-arrow-down-right', 'Bear case', list(b.bear), 'dsec--bear')}
+    </div>
+    ${section('ph-binoculars', "What I'd watch", watch)}
+    ${section('ph-warning', 'Cautions', list(b.cautions), 'dsec--warn')}
+    ${section('ph-puzzle-piece', 'Gaps in this research', list(b.gaps))}
+    ${section('ph-graduation-cap', 'Trading practice notes', `<p class="learn">For learning only. General education, not advice for your situation.</p>${list(b.practices)}`, 'dsec--learn')}
+    ${section('ph-list-numbers', 'Key numbers', keyNumbers({ ...m, scanned_at: state.results.find((x) => x.ticker === d.ticker)?.scanned_at }))}
+    ${section('ph-file-text', d.report ? `Full report (${d.report.date})` : 'Full report', report)}
+    <div class="dfoot">
+      <button class="btn" data-act="log" data-ticker="${esc(d.ticker)}"><i class="ph ph-notebook"></i> Log call</button>
+      <span class="muted">Research tool, not financial advice.</span>
+    </div>`;
+  $('#drawer-body').querySelector('[data-act="log"]').addEventListener('click', onCardAction);
 }
 
 // ---------- journal ----------

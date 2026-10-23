@@ -22,26 +22,35 @@ import re
 import sys
 import threading
 import time
+import urllib.parse
+import urllib.request
 import webbrowser
+import xml.etree.ElementTree as ET
 from argparse import Namespace
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date
+from email.utils import parsedate_to_datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 import journal
+from brief import build_brief
 from common import DATA_DIR, SKILL_DIR, load_config
 
 WEB_DIR = SKILL_DIR / "web"
 STATIC = {"/": ("index.html", "text/html"), "/app.js": ("app.js", "text/javascript"),
           "/app.css": ("app.css", "text/css")}
 WATCHLIST = DATA_DIR / "watchlist.json"
+REPORTS = DATA_DIR / "reports"
+NEWS_SECONDS = 900
+_NAME_NOISE = re.compile(r"\b(inc|corp|corporation|co|ltd|limited|plc|holdings?|company)\b\.?", re.I)
 MAX_TICKERS = 20
 CACHE_SECONDS = 300
 LOCAL_HOSTS = {"127.0.0.1", "localhost", "[::1]", "::1"}
 _TICKER = re.compile(r"^\^?[A-Z0-9][A-Z0-9.\-=]{0,14}$")
 
 _cache: dict[str, tuple[float, dict]] = {}
+_news_cache: dict[str, tuple[float, list]] = {}
 _cache_lock = threading.Lock()
 
 
@@ -114,6 +123,46 @@ def journal_rows(entries: list[dict], prices: dict[str, float], bench: dict[str,
     return rows
 
 
+def parse_rss(xml_text: str, limit: int = 6) -> list[dict]:
+    """Headlines from a Google News RSS feed, newest first. Only http(s) links survive."""
+    items = []
+    for it in ET.fromstring(xml_text).iter("item"):
+        url = (it.findtext("link") or "").strip()
+        if not url.startswith(("https://", "http://")):
+            continue
+        source = (it.findtext("source") or "").strip()
+        title = (it.findtext("title") or "").strip()
+        if source and title.endswith(f" - {source}"):
+            title = title[: -len(source) - 3]
+        try:
+            when = parsedate_to_datetime(it.findtext("pubDate") or "")
+        except (TypeError, ValueError):
+            when = None
+        items.append({"title": title, "source": source, "url": url,
+                      "date": when.date().isoformat() if when else None, "_ts": when.timestamp() if when else 0})
+    items.sort(key=lambda i: i["_ts"], reverse=True)
+    return [{k: v for k, v in i.items() if k != "_ts"} for i in items[:limit]]
+
+
+def news_query(name: str, ticker: str, asset_type: str) -> str:
+    """Search words for a ticker: company name without suffixes, base symbol, and kind."""
+    clean = re.sub(r"[^\w\s&]", " ", _NAME_NOISE.sub(" ", name or ""))
+    words = " ".join(clean.split()[:4])
+    base = ticker.split(".")[0].lstrip("^")
+    return f"{words} {base} {'etf' if asset_type == 'etf' else 'stock'}".strip()
+
+
+def latest_report(ticker: str) -> dict | None:
+    """Newest saved full report for this ticker (written by Claude in Report mode)."""
+    if not REPORTS.is_dir():
+        return None
+    files = sorted(p for p in REPORTS.glob(f"{ticker}-*.md")
+                   if re.fullmatch(rf"{re.escape(ticker)}-\d{{4}}-\d{{2}}-\d{{2}}", p.stem))
+    if not files:
+        return None
+    return {"date": files[-1].stem[len(ticker) + 1:], "markdown": files[-1].read_text()}
+
+
 def load_watchlist() -> list[str]:
     if not WATCHLIST.exists():
         return []
@@ -148,6 +197,34 @@ def scan_one(ticker: str, cfg: dict) -> dict:
     with _cache_lock:
         _cache[ticker] = (time.time(), out)
     return out
+
+
+def fetch_news(query: str) -> tuple[list[dict], str | None]:
+    """Headlines from Google News (last 7 days), cached. Returns (items, error)."""
+    hit = _news_cache.get(query)
+    if hit and time.time() - hit[0] < NEWS_SECONDS:
+        return hit[1], None
+    url = ("https://news.google.com/rss/search?" +
+           urllib.parse.urlencode({"q": f"{query} when:7d", "hl": "en-US", "gl": "US", "ceid": "US:en"}))
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 stock-analyst-dashboard"})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            items = parse_rss(resp.read(1_000_000).decode("utf-8", "replace"))
+    except Exception as e:
+        return [], f"Couldn't load headlines ({type(e).__name__}); try again in a minute."
+    _news_cache[query] = (time.time(), items)
+    return items, None
+
+
+def detail(ticker: str) -> dict:
+    """Everything the detail panel shows for one ticker."""
+    s = scan_one(ticker, load_config())
+    if not s["ok"]:
+        return {"ticker": ticker, "ok": False, "error": s["error"]}
+    m, r = s["metrics"], s["result"]
+    news, news_error = fetch_news(news_query(m["name"], ticker, m.get("asset_type", "stock")))
+    return {"ticker": ticker, "ok": True, "metrics": m, "result": r, "brief": build_brief(m, r),
+            "news": news, "news_error": news_error, "report": latest_report(ticker)}
 
 
 def scan(tickers: list[str]) -> list[dict]:
@@ -231,6 +308,11 @@ class Handler(BaseHTTPRequestHandler):
                 if not ok:
                     return self._send(400, {"error": "Add at least one valid symbol, e.g. AAPL or RELIANCE.NS"})
                 return self._send(200, {"results": scan(ok), "rejected": bad})
+            if url.path == "/api/detail":
+                ok, _ = parse_tickers(parse_qs(url.query).get("t", [""])[0])
+                if not ok:
+                    return self._send(400, {"error": "Missing or invalid symbol"})
+                return self._send(200, detail(ok[0]))
             if url.path == "/api/watchlist":
                 return self._send(200, {"tickers": load_watchlist()})
             if url.path == "/api/journal":

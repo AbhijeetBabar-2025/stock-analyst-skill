@@ -7,7 +7,7 @@ A stock analyst skill for Claude Code and other AI agents. It learns how you inv
 - **Quick score:** a -100 to +100 score for any Yahoo Finance ticker (US, India `.NS`/`.BO`, London `.L`, crypto `-USD`). It combines 7 factors: valuation, growth, profitability, financial health, momentum, analyst views and earnings surprises.
 - **Full report:** fundamental and technical research with bull and bear cases, valuation and risks, using live web research.
 - **ETFs:** funds (GLD, SPY, TLT, NIFTYBEES.NS) get their own score from momentum, track record, risk, cost and liquidity, and are compared with the right index for their asset class.
-- **Dashboard:** a local web page to type in symbols, see each result as a card, save a watchlist and track past calls. Run `uv run ~/.claude/skills/stock-analyst/scripts/dashboard.py --open`.
+- **Dashboard:** a local web page to type in symbols, see each result as a card, save a watchlist and track past calls. Click a card for the full analysis: why it's moving, latest headlines, bull and bear cases, what to watch, cautions, research gaps, learning-only trading notes and Claude's saved report. Run `uv run ~/.claude/skills/stock-analyst/scripts/dashboard.py --open`.
 - **Comparison:** puts several tickers side by side and ranks them.
 - **Portfolio tracker:** your holdings with profit/loss and warnings when one holding is too large.
 - **Memory that improves over time:**
@@ -22,7 +22,9 @@ A stock analyst skill for Claude Code and other AI agents. It learns how you inv
 npx skills add AbhijeetBabar-2025/stock-analyst-skill
 ```
 
-Add `-g` to install it for your user instead of the current project. Update later with `npx skills update`.
+Add `-g` to install it for your user instead of the current project.
+
+**Already installed?** Update with `npx skills update stock-analyst -g -y`, then restart Claude Code (and the dashboard, if it's running). Your data is kept. See [What's new](https://abhijeetbabar-2025.github.io/stock-analyst-skill/docs/whats-new).
 
 **Requirements:** [uv](https://docs.astral.sh/uv/getting-started/installation/), used to run the Python scripts. It installs `yfinance` and `pandas` automatically on first run. No API keys are needed.
 
@@ -57,6 +59,7 @@ Everything personal stays on your machine in `~/.stock-analyst/` (change the loc
 | `journal.jsonl` | Every call: date, price, verdict, reason |
 | `portfolio.json` | Your holdings |
 | `watchlist.json` | Symbols saved in the dashboard |
+| `reports/` | Full reports, shown in the dashboard |
 | `config.json` | Your factor-weight overrides (optional) |
 | `changes.md` | History of your tuning |
 

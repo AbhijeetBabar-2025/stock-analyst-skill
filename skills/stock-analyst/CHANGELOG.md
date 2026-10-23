@@ -3,6 +3,10 @@
 Every change to this skill's behaviour (weights, thresholds, workflow, scripts), newest first.
 
 ## 2026-10-23
+- Dashboard analysis panel: click a card for why it's moving, Google News headlines,
+  bull/bear cases, levels to watch, cautions, research gaps, learning-only trading
+  practices (`scripts/brief.py`) and the newest saved report. Report mode now saves
+  reports to `~/.stock-analyst/reports/TICKER-YYYY-MM-DD.md`. Scans add 1m/3m returns.
 - Dashboard: `scripts/dashboard.py` serves a local web UI (127.0.0.1:8787) to scan symbols
   as cards, save a watchlist, log calls and browse the journal with returns and outcomes.
 - ETF support: funds are detected and scored on momentum, track record, risk, cost and

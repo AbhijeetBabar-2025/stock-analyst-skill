@@ -16,6 +16,7 @@ Everything personal is stored **only on your computer**, in a folder called `.st
 | `journal.jsonl` | Every call: date, price, verdict, reason |
 | `portfolio.json` | Your holdings |
 | `watchlist.json` | Symbols saved in the dashboard |
+| `reports/` | Full reports Claude wrote, one Markdown file per ticker and date |
 | `config.json` | Your custom factor weights (only if you changed any) |
 | `changes.md` | A history of weight changes |
 

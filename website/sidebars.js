@@ -4,6 +4,7 @@
 const sidebars = {
   guide: [
     'intro',
+    'whats-new',
     {
       type: 'category',
       label: 'Installation',

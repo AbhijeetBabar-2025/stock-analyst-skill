@@ -38,6 +38,8 @@ You may be asked to allow web searches. Say yes.
 
 Every number comes with its **source and date**.
 
+Each report is saved to `~/.stock-analyst/reports/` (for example `GLD-2026-10-23.md`). Open the [dashboard](./dashboard) and click the stock's card to read it again any time.
+
 ## Tips
 
 - **Say how long you want it.** "Keep it to one page" or "be thorough". Claude remembers your preference in your [profile](../your-data).
