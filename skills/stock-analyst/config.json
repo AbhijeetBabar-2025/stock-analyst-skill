@@ -1,0 +1,19 @@
+{
+  "weights": {
+    "valuation": 15,
+    "growth": 15,
+    "profitability": 15,
+    "health": 10,
+    "momentum": 20,
+    "analysts": 15,
+    "earnings": 10
+  },
+  "thresholds": {
+    "buy": 25,
+    "sell": -25,
+    "earnings_warning_days": 14
+  },
+  "review": {
+    "min_age_days": 30
+  }
+}

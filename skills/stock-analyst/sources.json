@@ -1,0 +1,23 @@
+{
+  "sources": [
+    {
+      "repo": "tradermonty/claude-trading-skills",
+      "license": "MIT",
+      "use": "Copied into references/ (report framework). If changed, diff and merge into our copies.",
+      "files": [
+        {"path": "skills/us-stock-analysis/references/financial-metrics.md", "local": "references/financial-metrics.md", "sha": "f9617a89d6a1eb29ef251ab3516a26c2c22e9d7a"},
+        {"path": "skills/us-stock-analysis/references/fundamental-analysis.md", "local": "references/fundamental-analysis.md", "sha": "54fd81cef998dbc7413a6249cd038d2ca77cb88b"},
+        {"path": "skills/us-stock-analysis/references/report-template.md", "local": "references/report-template.md", "sha": "a194962f1703b6fbbf2e6afec71c12f2252371f5"},
+        {"path": "skills/us-stock-analysis/references/technical-analysis.md", "local": "references/technical-analysis.md", "sha": "65432a15cdb58db1e8495e74d1668e794485c2ef"}
+      ]
+    },
+    {
+      "repo": "gracefullight/stock-checker",
+      "license": "none (all rights reserved)",
+      "use": "Ideas only. No license, so never copy its code; read it for new factor ideas and reimplement them in scripts/scoring.py.",
+      "files": [
+        {"path": ".agents/skills/stock-analysis/SKILL.md", "local": null, "sha": "e05c0346734cb028e870738f0862816b24103890"}
+      ]
+    }
+  ]
+}
