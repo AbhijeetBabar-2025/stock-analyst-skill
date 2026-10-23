@@ -4,9 +4,11 @@ A stock analyst skill for Claude Code and other AI agents. It learns how you inv
 
 📖 **[Beginner's installation and user guide](https://abhijeetbabar-2025.github.io/stock-analyst-skill/)**
 
-🎬 **Demo** (21 seconds, sound on)
+🎬 **Demo** (21 seconds; click to watch with sound)
 
-https://github.com/user-attachments/assets/b45110ba-0600-4dd4-a7be-b42259f412fa
+<a href="https://abhijeetbabar-2025.github.io/stock-analyst-skill/video/stock-analyst-demo.mp4">
+  <img src="website/static/video/stock-analyst-demo-preview.gif" width="100%" alt="Demo: typing tickers into the Stock Analyst dashboard, scanning them into score cards, opening GLD's analysis panel, then the portfolio and journal tabs">
+</a>
 
 - **Quick score:** a -100 to +100 score for any Yahoo Finance ticker (US, India `.NS`/`.BO`, London `.L`, crypto `-USD`). It combines 7 factors: valuation, growth, profitability, financial health, momentum, analyst views and earnings surprises.
 - **Full report:** fundamental and technical research with bull and bear cases, valuation and risks, using live web research.
