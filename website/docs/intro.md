@@ -34,7 +34,7 @@ Most stock tools forget everything when you close them. This one keeps a **journ
 
 ## How long does setup take?
 
-About **15–20 minutes** the first time, most of it waiting for downloads. You don't need to know how to code. Every step tells you exactly what to type.
+About **15-20 minutes** the first time, most of it waiting for downloads. You don't need to know how to code. Every step tells you exactly what to type.
 
 :::caution Not financial advice
 This is a research tool. It can be wrong, and its data can be late or incomplete. Always do your own research and never invest money you can't afford to lose.

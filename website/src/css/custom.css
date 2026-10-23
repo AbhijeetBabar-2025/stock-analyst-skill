@@ -1,30 +1,416 @@
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
+/*
+ * Stock Analyst docs theme.
+ * Visual language inspired by the "Edge Hound - Stock ticker overview" Dribbble shot
+ * by Ivo Ivanov: cool grey canvas, white rounded cards, one violet accent,
+ * tinted up/down pills, orange heat blocks. Colours and shapes only; no assets reused.
+ *
+ * Shape system: cards 16px, buttons/inputs/code 10px, pills fully rounded.
  */
 
-/* You can override the default Infima variables here. */
+@import '@fontsource-variable/geist';
+@import '@fontsource-variable/geist-mono';
+
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+  /* Surfaces */
+  --sa-canvas: #f3f3f6;
+  --sa-surface: #fdfdfe;
+  --sa-inset: #ebebf0;
+  --sa-border: #e2e2e9;
+  --sa-text: #16161b;
+  --sa-text-2: #5c5c6a;
+  --sa-text-3: #8a8a98;
+
+  /* Accent (violet) */
+  --sa-accent: #6b2fe0;
+  --sa-accent-hover: #5a22c9;
+  --sa-accent-soft: #efe8fd;
+  --sa-accent-on-soft: #5520b8;
+  --sa-on-accent: #fdfdfe;
+
+  /* Semantic */
+  --sa-up: #15803d;
+  --sa-up-soft: #dcfce7;
+  --sa-down: #b91c1c;
+  --sa-down-soft: #fee2e2;
+  --sa-heat-1: #fde4d3;
+  --sa-heat-2: #fbc6a3;
+  --sa-heat-3: #f6a273;
+  --sa-heat-4: #ee7f45;
+  --sa-heat-5: #e2611f;
+
+  --sa-shadow: 0 1px 2px rgb(22 22 40 / 0.04), 0 1px 1px rgb(22 22 40 / 0.03);
+  --sa-shadow-raised: 0 6px 24px -8px rgb(40 30 90 / 0.14);
+  --sa-radius-card: 16px;
+  --sa-radius-ctrl: 10px;
+
+  /* Infima mapping */
+  --ifm-color-primary: var(--sa-accent);
+  --ifm-color-primary-dark: #6029cf;
+  --ifm-color-primary-darker: var(--sa-accent-hover);
+  --ifm-color-primary-darkest: #4a1ca6;
+  --ifm-color-primary-light: #7a44e6;
+  --ifm-color-primary-lighter: #8455e8;
+  --ifm-color-primary-lightest: #9b74ed;
+
+  --ifm-background-color: var(--sa-canvas);
+  --ifm-background-surface-color: var(--sa-surface);
+  --ifm-font-color-base: var(--sa-text);
+  --ifm-font-color-secondary: var(--sa-text-2);
+  --ifm-color-content: var(--sa-text);
+  --ifm-color-content-secondary: var(--sa-text-2);
+  --ifm-heading-color: var(--sa-text);
+  --ifm-toc-border-color: var(--sa-border);
+  --ifm-hr-background-color: var(--sa-border);
+  --ifm-color-emphasis-200: var(--sa-border);
+  --ifm-color-emphasis-300: var(--sa-border);
+
+  --ifm-font-family-base: 'Geist Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --ifm-heading-font-family: var(--ifm-font-family-base);
+  --ifm-font-family-monospace: 'Geist Mono Variable', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ifm-heading-font-weight: 650;
+  --ifm-line-height-base: 1.65;
+  --ifm-code-font-size: 88%;
+  --ifm-code-border-radius: 6px;
+  --ifm-code-background: var(--sa-inset);
+  --ifm-global-radius: var(--sa-radius-ctrl);
+  --ifm-button-border-radius: var(--sa-radius-ctrl);
+  --ifm-pre-border-radius: var(--sa-radius-ctrl);
+  --ifm-card-border-radius: var(--sa-radius-card);
+  --ifm-link-decoration: none;
+
+  --ifm-navbar-background-color: var(--sa-canvas);
+  --ifm-navbar-shadow: none;
+  --ifm-navbar-height: 64px;
+  --ifm-navbar-link-color: var(--sa-text-2);
+  --ifm-navbar-link-hover-color: var(--sa-text);
+
+  --ifm-menu-color: var(--sa-text-2);
+  --ifm-menu-color-active: var(--sa-accent);
+  --ifm-menu-color-background-active: var(--sa-surface);
+  --ifm-menu-color-background-hover: rgb(22 22 40 / 0.04);
+  --ifm-menu-link-padding-vertical: 0.45rem;
+  --ifm-menu-link-padding-horizontal: 0.75rem;
+
+  --ifm-table-border-color: var(--sa-border);
+  --ifm-table-stripe-background: transparent;
+  --ifm-table-head-background: var(--sa-inset);
+
+  --ifm-footer-background-color: var(--sa-canvas);
+  --ifm-footer-color: var(--sa-text-2);
+  --ifm-footer-link-color: var(--sa-text-2);
+  --ifm-footer-link-hover-color: var(--sa-accent);
+  --ifm-footer-title-color: var(--sa-text);
+
+  --docusaurus-highlighted-code-line-bg: rgb(107 47 224 / 0.08);
 }
 
-/* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  --sa-canvas: #0f0f13;
+  --sa-surface: #17171d;
+  --sa-inset: #212129;
+  --sa-border: #2a2a33;
+  --sa-text: #ededf2;
+  --sa-text-2: #a3a3b0;
+  --sa-text-3: #75757f;
+
+  --sa-accent: #a585ff;
+  --sa-accent-hover: #b89dff;
+  --sa-accent-soft: rgb(165 133 255 / 0.14);
+  --sa-accent-on-soft: #cbb8ff;
+  --sa-on-accent: #16161b;
+
+  --sa-up: #4ade80;
+  --sa-up-soft: rgb(74 222 128 / 0.13);
+  --sa-down: #f87171;
+  --sa-down-soft: rgb(248 113 113 / 0.13);
+  --sa-heat-1: #7a3f1d;
+  --sa-heat-2: #94481f;
+  --sa-heat-3: #a24f22;
+  --sa-heat-4: #d66a2a;
+  --sa-heat-5: #f08a45;
+
+  --sa-shadow: 0 1px 0 rgb(255 255 255 / 0.03) inset;
+  --sa-shadow-raised: 0 10px 30px -10px rgb(0 0 0 / 0.6);
+
+  --ifm-color-primary: var(--sa-accent);
+  --ifm-color-primary-dark: #9672ff;
+  --ifm-color-primary-darker: #8d66ff;
+  --ifm-color-primary-darkest: #7447ff;
+  --ifm-color-primary-light: var(--sa-accent-hover);
+  --ifm-color-primary-lighter: #c2a9ff;
+  --ifm-color-primary-lightest: #d6c6ff;
+  --ifm-menu-color-background-hover: rgb(255 255 255 / 0.04);
+  --docusaurus-highlighted-code-line-bg: rgb(165 133 255 / 0.12);
+}
+
+body {
+  background: var(--sa-canvas);
+  font-feature-settings: 'ss01', 'cv11';
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.02em;
+}
+
+/* ---------- Navbar ---------- */
+.navbar {
+  border-bottom: 1px solid var(--sa-border);
+}
+.navbar__title {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+.navbar__link {
+  font-weight: 500;
+  font-size: 0.94rem;
+}
+.navbar__link--active {
+  color: var(--sa-text);
+}
+.navbar__logo {
+  height: 1.75rem;
+}
+
+/* ---------- Sidebar: active item is a white pill with violet text ---------- */
+.theme-doc-sidebar-container {
+  border-right: 1px solid var(--sa-border) !important;
+}
+.menu {
+  padding: 1rem 0.75rem;
+}
+.menu__link {
+  border-radius: var(--sa-radius-ctrl);
+  font-size: 0.93rem;
+  font-weight: 450;
+}
+.menu__link--active:not(.menu__link--sublist) {
+  background: var(--sa-surface);
+  box-shadow: var(--sa-shadow), 0 0 0 1px var(--sa-border);
+  font-weight: 550;
+}
+.menu__list-item-collapsible .menu__link--sublist,
+.menu__link--sublist-caret {
+  color: var(--sa-text-3);
+  font-size: 0.8rem;
+  font-weight: 550;
+}
+.menu__list-item-collapsible:hover {
+  background: transparent;
+}
+.menu__link--sublist-caret:after {
+  opacity: 0.5;
+}
+
+/* ---------- Doc content sits on a white card, like the reference's panels ---------- */
+.theme-doc-markdown {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: var(--sa-radius-card);
+  box-shadow: var(--sa-shadow);
+  padding: 2rem 2.25rem;
+}
+@media (max-width: 996px) {
+  .theme-doc-markdown {
+    padding: 1.25rem 1rem;
+  }
+}
+.theme-doc-markdown h1 {
+  font-size: 2.1rem;
+}
+.theme-doc-markdown h2 {
+  font-size: 1.4rem;
+  margin-top: 2.25rem;
+}
+.theme-doc-markdown h3 {
+  font-size: 1.1rem;
+}
+.breadcrumbs__link {
+  border-radius: 999px;
+  font-size: 0.85rem;
+}
+
+/* Tables: white panel, header on inset grey, single hairline between rows */
+.theme-doc-markdown table {
+  display: table;
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1px solid var(--sa-border);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 0.93rem;
+}
+@media (max-width: 768px) {
+  .theme-doc-markdown table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+.theme-doc-markdown table thead tr {
+  background: var(--sa-inset);
+}
+.theme-doc-markdown table th {
+  font-weight: 550;
+  color: var(--sa-text-2);
+  font-size: 0.85rem;
+  text-align: left;
+}
+.theme-doc-markdown table th,
+.theme-doc-markdown table td {
+  border: 0;
+  padding: 0.65rem 0.9rem;
+}
+.theme-doc-markdown table tbody tr td {
+  border-top: 1px solid var(--sa-border);
+}
+.theme-doc-markdown table tr {
+  background: transparent;
+}
+
+/* Code */
+.theme-code-block {
+  border: 1px solid var(--sa-border);
+  box-shadow: none;
+}
+code {
+  border: 0;
+}
+kbd {
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+  box-shadow: none;
+  font-family: var(--ifm-font-family-base);
+  font-size: 0.82em;
+  padding: 0.05rem 0.4rem;
+}
+
+/* Tabs: underline style, dark active label (reference's Overview / Trade Ideas row) */
+.tabs {
+  border-bottom: 1px solid var(--sa-border);
+  margin-bottom: 1rem;
+}
+.tabs__item {
+  border-radius: 0;
+  color: var(--sa-text-2);
+  font-weight: 500;
+  padding: 0.55rem 0.9rem;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.tabs__item:hover {
+  background: transparent;
+  color: var(--sa-text);
+}
+.tabs__item--active {
+  color: var(--sa-text);
+  border-bottom-color: var(--sa-text);
+}
+
+/* Admonitions: soft tinted panels */
+.theme-admonition {
+  border: 1px solid var(--sa-border);
+  border-left-width: 1px;
+  border-radius: 14px;
+  box-shadow: none;
+}
+.alert--info,
+.alert--secondary {
+  --ifm-alert-background-color: var(--sa-accent-soft);
+  --ifm-alert-border-color: transparent;
+  --ifm-alert-foreground-color: var(--sa-text);
+}
+.alert--success {
+  --ifm-alert-background-color: var(--sa-up-soft);
+  --ifm-alert-border-color: transparent;
+}
+.alert--warning {
+  --ifm-alert-background-color: #fff4e6;
+  --ifm-alert-border-color: transparent;
+}
+[data-theme='dark'] .alert--warning {
+  --ifm-alert-background-color: rgb(240 138 69 / 0.12);
+}
+.alert--danger {
+  --ifm-alert-background-color: var(--sa-down-soft);
+  --ifm-alert-border-color: transparent;
+}
+
+/* Buttons */
+.button {
+  font-weight: 550;
+  transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.15s;
+}
+.button:active {
+  transform: translateY(1px);
+}
+.button--primary {
+  --ifm-button-background-color: var(--sa-accent);
+  --ifm-button-border-color: var(--sa-accent);
+  --ifm-button-color: var(--sa-on-accent);
+}
+.button--primary:hover {
+  --ifm-button-background-color: var(--sa-accent-hover);
+  --ifm-button-border-color: var(--sa-accent-hover);
+}
+.button.button--secondary {
+  background-color: var(--sa-surface);
+  border-color: var(--sa-border);
+  color: var(--sa-text);
+}
+.button.button--secondary:hover {
+  background-color: var(--sa-inset);
+  color: var(--sa-text);
+}
+
+/* Prev / next cards */
+.pagination-nav__link {
+  background: var(--sa-surface);
+  border-color: var(--sa-border);
+  border-radius: 14px;
+}
+.pagination-nav__link:hover {
+  border-color: var(--sa-accent);
+}
+
+/* TOC */
+.table-of-contents__link--active {
+  color: var(--sa-accent);
+  font-weight: 550;
+}
+
+/* Footer */
+.footer {
+  border-top: 1px solid var(--sa-border);
+}
+
+/* Shared pills (reference: green "↗ 1.42%", red "↘ 9", violet "12.3% Max return") */
+.sa-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 550;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.sa-pill--up {
+  background: var(--sa-up-soft);
+  color: var(--sa-up);
+}
+.sa-pill--down {
+  background: var(--sa-down-soft);
+  color: var(--sa-down);
+}
+.sa-pill--accent {
+  background: var(--sa-accent-soft);
+  color: var(--sa-accent-on-soft);
+}
+.sa-pill--neutral {
+  background: var(--sa-inset);
+  color: var(--sa-text-2);
 }

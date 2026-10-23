@@ -1,26 +1,110 @@
-.heroBanner {
-  padding: 4rem 0;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
+.hero {
+  padding: 4rem 0 2rem;
 }
 
-@media screen and (max-width: 996px) {
-  .heroBanner {
-    padding: 2rem 1rem;
-  }
+.heroGrid {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 3.5rem;
+  align-items: center;
+}
+
+.title {
+  font-size: clamp(2.2rem, 4vw, 3.1rem);
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+  max-width: 19ch;
+  margin-bottom: 1.1rem;
+}
+
+.subtitle {
+  font-size: 1.15rem;
+  color: var(--sa-text-2);
+  max-width: 44ch;
+  margin-bottom: 1.5rem;
 }
 
 .install {
-  max-width: 560px;
-  margin: 1.5rem auto;
-  text-align: left;
+  max-width: 520px;
+}
+
+.install :global(.theme-code-block) {
+  margin-bottom: 1.25rem;
+  background: var(--sa-surface);
 }
 
 .buttons {
   display: flex;
   flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.heroVisual {
+  min-width: 0;
+}
+
+.steps {
+  padding: 1rem 0 5rem;
+}
+
+.stepsHeading {
+  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+  margin-bottom: 1.5rem;
+}
+
+.stepsPanel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  background: var(--sa-surface);
+  border: 1px solid var(--sa-border);
+  border-radius: var(--sa-radius-card);
+  box-shadow: var(--sa-shadow);
+}
+
+.step {
+  padding: 1.5rem 1.6rem;
+}
+
+.step + .step {
+  border-left: 1px solid var(--sa-border);
+}
+
+.stepVerb {
+  font-size: 1.25rem;
+  margin-bottom: 0.4rem;
+}
+
+.stepText {
+  color: var(--sa-text-2);
+  font-size: 0.95rem;
+  margin-bottom: 0.9rem;
+}
+
+.stepLink {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  gap: 0.35rem;
+  font-weight: 550;
+  font-size: 0.92rem;
+}
+
+@media (max-width: 996px) {
+  .heroGrid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  .hero {
+    padding-top: 2.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .stepsPanel {
+    grid-template-columns: 1fr;
+  }
+  .step + .step {
+    border-left: 0;
+    border-top: 1px solid var(--sa-border);
+  }
 }

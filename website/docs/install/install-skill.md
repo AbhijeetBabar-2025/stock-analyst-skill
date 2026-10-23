@@ -56,7 +56,7 @@ npx skills add AbhijeetBabar-2025/stock-analyst-skill -g
    What skills do you have for stocks?
    ```
 
-3. Claude should mention **stock-analyst**. 🎉
+3. Claude should mention **stock-analyst**.
 
 If it doesn't, see [Troubleshooting](../troubleshooting#claude-doesnt-know-about-the-skill).
 

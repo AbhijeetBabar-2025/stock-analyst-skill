@@ -44,7 +44,7 @@ Plain-English meanings of the terms you'll see.
 
 **ROE (return on equity).** How much profit the company makes from shareholders' money. Above 15% is good.
 
-**RSI (Relative Strength Index).** A 0–100 measure of how fast the price has been moving. Over 70 is "overbought" (may have risen too fast); under 30 is "oversold".
+**RSI (Relative Strength Index).** A 0-100 measure of how fast the price has been moving. Over 70 is "overbought" (may have risen too fast); under 30 is "oversold".
 
 **Support / resistance.** Price levels where a stock has tended to stop falling (support) or stop rising (resistance).
 

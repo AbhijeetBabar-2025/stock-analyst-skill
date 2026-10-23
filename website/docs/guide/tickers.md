@@ -10,12 +10,12 @@ A **ticker** is a stock's short code, like `AAPL` for Apple. The skill uses **Ya
 
 | Market | Format | Examples | Compared against | How well it works |
 |---|---|---|---|---|
-| 🇺🇸 **US** | Plain symbol | `AAPL`, `MSFT`, `NVDA` | S&P 500 (SPY) | ⭐⭐⭐ Best: all data available |
-| 🇮🇳 **India, NSE** | Add `.NS` | `RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS` | Nifty 50 | ⭐⭐ Good |
-| 🇮🇳 **India, BSE** | Add `.BO` | `RELIANCE.BO`, `TCS.BO` | Nifty 50 | ⭐⭐ Good |
-| 🇬🇧 **UK** | Add `.L` | `HSBA.L`, `BP.L` | FTSE 100 | ⭐⭐ Good |
-| 🪙 **Crypto** | Add `-USD` | `BTC-USD`, `ETH-USD` | Bitcoin | ⭐ Price trend only |
-| 🌍 **Other** | Yahoo suffix | `7203.T` (Tokyo), `SAP.DE` (Germany) | S&P 500 | ⭐ Varies |
+| **US** | Plain symbol | `AAPL`, `MSFT`, `NVDA` | S&P 500 (SPY) | Best: all data available |
+| **India, NSE** | Add `.NS` | `RELIANCE.NS`, `TCS.NS`, `HDFCBANK.NS` | Nifty 50 | Good |
+| **India, BSE** | Add `.BO` | `RELIANCE.BO`, `TCS.BO` | Nifty 50 | Good |
+| **UK** | Add `.L` | `HSBA.L`, `BP.L` | FTSE 100 | Good |
+| **Crypto** | Add `-USD` | `BTC-USD`, `ETH-USD` | Bitcoin | Price trend only |
+| **Other** | Yahoo suffix | `7203.T` (Tokyo), `SAP.DE` (Germany) | S&P 500 | Varies |
 
 ## Finding a ticker
 

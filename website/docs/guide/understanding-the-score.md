@@ -10,9 +10,9 @@ The score runs from **-100** (very weak) to **+100** (very strong).
 
 | Score | Verdict | Meaning |
 |---|---|---|
-| **+25 or higher** | 🟢 BUY-lean | The numbers look good overall |
-| **between -25 and +25** | 🟡 HOLD | Mixed: nothing compelling either way |
-| **-25 or lower** | 🔴 SELL-lean | The numbers look weak overall |
+| **+25 or higher** | BUY-lean | The numbers look good overall |
+| **between -25 and +25** | HOLD | Mixed: nothing compelling either way |
+| **-25 or lower** | SELL-lean | The numbers look weak overall |
 
 Special cases:
 
@@ -38,7 +38,7 @@ New to these terms? See the [Glossary](../glossary).
 ## Confidence
 
 - **High:** 85%+ of the data was available.
-- **Medium:** 60–85%.
+- **Medium:** 60-85%.
 - **Low:** under 60%. Factors with no data are left out, not counted as zero.
 
 ## Flags

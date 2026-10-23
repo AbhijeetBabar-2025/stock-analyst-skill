@@ -40,7 +40,7 @@ Do you want to proceed?
 Choose **1. Yes**. Choose **2** if you don't want to be asked every time.
 
 :::note The first run is slower
-The very first time, `uv` downloads the data tools it needs, which takes 20–60 seconds. After that, scores come back in a few seconds.
+The very first time, `uv` downloads the data tools it needs, which takes 20-60 seconds. After that, scores come back in a few seconds.
 :::
 
 ## 4. Read the result
