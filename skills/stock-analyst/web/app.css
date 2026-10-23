@@ -622,6 +622,14 @@ body.locked { overflow: hidden; }
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* Tablet widths: keep the portfolio form and table inside the page */
+@media (max-width: 960px) {
+  .pf-form { grid-template-columns: 1fr 1fr; }
+  .pf-form .btn { grid-column: 1 / -1; justify-content: center; }
+  .pf th:nth-child(3), .pf td:nth-child(3),
+  .pf th:nth-child(4), .pf td:nth-child(4) { display: none; } /* avg cost, price */
+}
+
 @media (max-width: 640px) {
   .topbar__inner { gap: 12px; }
   .brand { font-size: 0; gap: 0; }
@@ -631,7 +639,5 @@ body.locked { overflow: hidden; }
   .card__body { grid-template-columns: 1fr; }
   .score { max-width: 160px; margin: 0 auto; width: 100%; }
   .cases { grid-template-columns: 1fr; }
-  .pf-form { grid-template-columns: 1fr 1fr; }
-  .pf-form .btn { grid-column: 1 / -1; justify-content: center; }
   .dhead { grid-template-columns: 1fr; }
 }
