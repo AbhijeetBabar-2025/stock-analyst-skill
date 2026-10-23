@@ -1,0 +1,10 @@
+I built a stock analyst that grades its own homework 📈
+
+Type a ticker → get a score, the bull and bear case, and the levels to watch. Track your portfolio in $ and ₹. Every call gets checked against the market 30 days later.
+
+Free skill for Claude Code. Install: npx skills add AbhijeetBabar-2025/stock-analyst-skill
+Guide: abhijeetbabar-2025.github.io/stock-analyst-skill (link in bio)
+
+Research tool, not financial advice.
+
+#stockmarket #investing #claudecode #ai #buildinpublic #indianstockmarket #nifty #stocks
