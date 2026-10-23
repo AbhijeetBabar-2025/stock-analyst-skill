@@ -7,5 +7,5 @@ __pycache__/
 journal.jsonl
 portfolio.json
 
-# /brag video: keep the deliverables, not the frames and tooling
-brag-output*/work/
+# /brag working files (the published videos live in demo/)
+brag-output*/

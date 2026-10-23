@@ -1,1 +1,0 @@
-I built a stock analyst that grades its own homework. Type a ticker and it gives you a score, the bull and bear case, and the levels to watch, then checks every call against the market 30 days later. Free skill for Claude Code: npx skills add AbhijeetBabar-2025/stock-analyst-skill
