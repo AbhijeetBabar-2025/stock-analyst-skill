@@ -8,6 +8,10 @@ The latest changes, newest first. Already installed? [Update in one command](./u
 
 ## October 2026
 
+### Portfolio tab in the dashboard
+
+Add, view and remove holdings in the [dashboard](./guide/dashboard#portfolio). It shows totals per currency, an allocation bar, profit and loss, a warning when one holding gets too big, and today's score for each holding. Click a holding for its full analysis. The buttons, dropdowns and focus outlines across the dashboard were also tidied up.
+
 ### Analysis panel in the dashboard
 
 Click any card in the [dashboard](./guide/dashboard) to open a full analysis:

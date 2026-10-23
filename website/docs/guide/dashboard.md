@@ -61,6 +61,20 @@ Ask Claude in Claude Code: `full report on GLD`. The report is saved automatical
 The panel's explanations are built from price and company data, so they describe *what* is happening (for example "in a downtrend, 26% below its high"). The *reasons* behind a move, like a news event or a rate decision, come from the headlines and from Claude's full report.
 :::
 
+## Portfolio
+
+The **Portfolio** tab tracks what you own.
+
+- **Add a holding:** type the symbol, how many you bought, and the price you paid for each, then press **Add holding**. Bought more of the same stock later? Add it again; the average cost is worked out for you.
+- **Totals per currency:** your value, the amount invested and your profit or loss, shown separately for dollars, rupees and so on. Nothing is converted between currencies.
+- **Allocation bar:** how much of your money each holding makes up.
+- **Holdings table:** quantity, average cost, today's price, value, profit or loss, weight, and **today's score** for each holding. A **concentrated** warning appears when one holding is more than 30% of its currency's total.
+- **Click a holding** to open its full analysis, the same panel as in the Scanner.
+- **Sold some?** Press the bin icon, type how many you sold (or leave it as "all"), and press **Remove**.
+- **Refresh prices** fetches the latest prices and scores.
+
+It's the same portfolio Claude manages when you say "I bought 10 AAPL at 180", so both stay in sync.
+
 ## Journal
 
 The **Journal** tab lists every call, whether it was logged from the dashboard or by Claude:

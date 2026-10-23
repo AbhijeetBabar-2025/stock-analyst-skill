@@ -110,3 +110,54 @@ def test_latest_report_picks_newest_for_that_ticker(dash, tmp_path):
     r = dash.latest_report("GLD")
     assert r == {"date": "2026-10-23", "markdown": "# new"}
     assert dash.latest_report("AAPL") is None
+
+
+def test_portfolio_view_totals_per_currency(dash):
+    holdings = {"AAPL": {"qty": 10, "avg_cost": 200.0}, "GLD": {"qty": 5, "avg_cost": 400.0},
+                "TCS.NS": {"qty": 4, "avg_cost": 3000.0}}
+    quotes = {
+        "AAPL": {"price": 300.0, "currency": "USD", "name": "Apple", "verdict": "HOLD", "score": 35, "asset_type": "stock"},
+        "GLD": {"price": 360.0, "currency": "USD", "name": "Gold", "verdict": "HOLD", "score": 2, "asset_type": "etf"},
+        "TCS.NS": {"price": 2500.0, "currency": "INR", "name": "TCS", "verdict": "SELL-lean", "score": -30, "asset_type": "stock"},
+    }
+    v = dash.portfolio_view(holdings, quotes, {})
+    rows = {r["ticker"]: r for r in v["rows"]}
+    assert rows["AAPL"]["value"] == 3000.0
+    assert math.isclose(rows["AAPL"]["pnl_pct"], 0.5)
+    assert math.isclose(rows["GLD"]["pnl"], -200.0)
+    # weights are within each currency: USD total 4800
+    assert math.isclose(rows["AAPL"]["weight"], 3000 / 4800)
+    assert rows["AAPL"]["concentrated"] is True and rows["TCS.NS"]["weight"] == 1.0
+    usd = v["totals"]["USD"]
+    assert usd == {"value": 4800.0, "cost": 4000.0, "pnl": 800.0, "pnl_pct": 0.2, "count": 2}
+    assert v["totals"]["INR"]["pnl"] == -2000.0
+    assert [r["ticker"] for r in v["rows"]][:2] == ["AAPL", "GLD"]  # USD by value, then INR
+
+
+def test_portfolio_view_missing_quote(dash):
+    v = dash.portfolio_view({"ZZZ": {"qty": 1, "avg_cost": 5.0}}, {}, {"ZZZ": "No price history"})
+    row = v["rows"][0]
+    assert row["price"] is None and row["value"] is None and row["error"] == "No price history"
+    assert v["totals"] == {}
+
+
+@pytest.mark.parametrize("body,expected", [
+    ({"action": "add", "ticker": "aapl", "qty": "10", "cost": 180}, ("add", "AAPL", 10.0, 180.0)),
+    ({"action": "remove", "ticker": "GLD"}, ("remove", "GLD", None, None)),
+    ({"action": "remove", "ticker": "GLD", "qty": 2}, ("remove", "GLD", 2.0, None)),
+])
+def test_parse_trade_ok(dash, body, expected):
+    assert dash.parse_trade(body) == expected
+
+
+@pytest.mark.parametrize("body", [
+    {"action": "add", "ticker": "AAPL", "qty": 0, "cost": 10},
+    {"action": "add", "ticker": "AAPL", "qty": 1, "cost": -5},
+    {"action": "add", "ticker": "AAPL", "qty": "abc", "cost": 5},
+    {"action": "add", "ticker": "bad$$", "qty": 1, "cost": 5},
+    {"action": "sell-everything", "ticker": "AAPL"},
+    {"action": "remove", "ticker": "AAPL", "qty": -1},
+])
+def test_parse_trade_rejects_bad_input(dash, body):
+    with pytest.raises(ValueError):
+        dash.parse_trade(body)

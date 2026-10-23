@@ -69,13 +69,16 @@ $('#theme').addEventListener('click', () => {
 });
 
 // ---------- views ----------
+const VIEWS = ['scanner', 'portfolio', 'journal'];
+
 function showView() {
-  const view = location.hash === '#journal' ? 'journal' : 'scanner';
+  const hash = location.hash.slice(1);
+  const view = VIEWS.includes(hash) ? hash : 'scanner';
   document.querySelectorAll('.tab').forEach((t) =>
     t.setAttribute('aria-selected', String(t.dataset.view === view)));
-  $('#view-scanner').hidden = view !== 'scanner';
-  $('#view-journal').hidden = view !== 'journal';
+  VIEWS.forEach((v) => { $(`#view-${v}`).hidden = v !== view; });
   if (view === 'journal') loadJournal();
+  if (view === 'portfolio') loadPortfolio();
 }
 window.addEventListener('hashchange', showView);
 
@@ -153,7 +156,7 @@ async function scan() {
   state.scanning = true;
   const btn = $('#scan-btn');
   btn.disabled = true;
-  btn.innerHTML = '<i class="ph-bold ph-circle-notch"></i> Scanning';
+  btn.innerHTML = '<i class="ph-bold ph-circle-notch spin"></i> Scanning';
   $('#empty').hidden = true;
   $('#results').innerHTML = state.chips.map(skeleton).join('');
   try {
@@ -411,6 +414,126 @@ function renderDetail(d) {
   $('#drawer-body').querySelector('[data-act="log"]').addEventListener('click', onCardAction);
 }
 
+// ---------- portfolio ----------
+const SHADES = [100, 62, 36, 82, 48, 24]; // alternate strong and light so neighbours differ
+
+function pfSkeleton() {
+  return `<div style="padding:18px;display:grid;gap:10px">${'<div class="sk" style="height:18px"></div>'.repeat(4)}</div>`;
+}
+
+async function loadPortfolio(refresh = false) {
+  $('#pf-table').innerHTML = pfSkeleton();
+  if (refresh) $('#pf-totals').innerHTML = '';
+  try {
+    renderPortfolio(await api('/api/portfolio'));
+  } catch (e) {
+    $('#pf-table').innerHTML = errorCard("Couldn't load your portfolio", e.message);
+  }
+}
+
+function renderPortfolio({ rows, totals }) {
+  const curs = Object.keys(totals).sort((a, b) => (a === 'USD' ? -1 : b === 'USD' ? 1 : a.localeCompare(b)));
+  $('#pf-totals').innerHTML = curs.map((cur) => {
+    const t = totals[cur];
+    const items = rows.filter((r) => r.currency === cur && r.value != null);
+    const bar = items.map((r, i) => `<span class="alloc__seg" title="${esc(r.ticker)} ${esc(pct(r.weight).replace('+', ''))}"
+        style="flex:${r.weight};background:color-mix(in srgb, var(--accent) ${SHADES[i % SHADES.length]}%, var(--inset))"></span>`).join('');
+    const legend = items.map((r, i) => `<span><i style="background:color-mix(in srgb, var(--accent) ${SHADES[i % SHADES.length]}%, var(--inset))"></i>
+        ${esc(r.ticker)} ${esc(pct(r.weight).replace('+', ''))}</span>`).join('');
+    return `<div class="panel total">
+      <div class="total__head"><span class="pill pill--neutral">${esc(cur)}</span>
+        <span class="muted">${t.count} holding${t.count === 1 ? '' : 's'}</span></div>
+      <div class="total__value">${esc(money(t.value, cur))}</div>
+      <div class="total__pnl"><span class="pill ${t.pnl >= 0 ? 'pill--up' : 'pill--down'}">${esc(pct(t.pnl_pct))}</span>
+        <span class="muted">${t.pnl >= 0 ? '+' : ''}${esc(money(t.pnl, cur))} on ${esc(money(t.cost, cur))} invested</span></div>
+      <div class="alloc" aria-label="Allocation">${bar}</div>
+      <div class="alloc__legend">${legend}</div>
+    </div>`;
+  }).join('');
+
+  if (!rows.length) {
+    $('#pf-table').innerHTML = `<div class="empty"><i class="ph ph-briefcase"></i><h2>No holdings yet</h2>
+      <p>Add what you own above: the symbol, how many, and the price you paid.</p></div>`;
+    return;
+  }
+  $('#pf-table').innerHTML = `<table class="pf">
+    <thead><tr><th>Holding</th><th>Qty</th><th>Avg cost</th><th>Price</th><th>Value</th>
+      <th>Profit / loss</th><th>Weight</th><th>Today's score</th><th></th></tr></thead>
+    <tbody>${rows.map((r) => `<tr class="pf-row" data-ticker="${esc(r.ticker)}" tabindex="0">
+      <td><div class="t-ticker">${esc(r.ticker)}</div>
+        <div class="thesis">${r.error ? `<span class="neg">${esc(r.error)}</span>` : esc(r.name || '')}</div></td>
+      <td class="num">${esc(num(r.qty, r.qty % 1 ? 4 : 0))}</td>
+      <td class="num">${esc(money(r.avg_cost, r.currency))}</td>
+      <td class="num">${esc(money(r.price, r.currency))}</td>
+      <td class="num">${esc(money(r.value, r.currency))}</td>
+      <td class="num">${r.pnl == null ? 'n/a' : `<span class="${r.pnl >= 0 ? 'pos' : 'neg'}">${r.pnl >= 0 ? '+' : ''}${esc(money(r.pnl, r.currency))}<br>${esc(pct(r.pnl_pct))}</span>`}</td>
+      <td class="num">${r.weight == null ? 'n/a' : esc(pct(r.weight).replace('+', ''))}
+        ${r.concentrated ? '<span class="pill pill--warn" title="More than 30% of this currency\'s holdings">concentrated</span>' : ''}</td>
+      <td>${r.verdict ? `<span class="pill ${verdictClass(r.verdict)}">${esc(r.verdict)} ${r.score > 0 ? '+' : ''}${esc(Math.round(r.score))}</span>` : ''}</td>
+      <td class="pf-actions"><button class="icon-btn icon-btn--small" data-remove="${esc(r.ticker)}" aria-label="Remove ${esc(r.ticker)}" title="Remove ${esc(r.ticker)}"><i class="ph ph-trash"></i></button></td>
+    </tr>`).join('')}</tbody></table>
+    <p class="pf-note muted">Click a holding for its full analysis. Totals are per currency, with no exchange-rate conversion.</p>`;
+
+  $('#pf-table').querySelectorAll('.pf-row').forEach((tr) => {
+    tr.addEventListener('click', (e) => { if (!e.target.closest('button, input')) openDetail(tr.dataset.ticker); });
+    tr.addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target === tr) openDetail(tr.dataset.ticker); });
+  });
+  $('#pf-table').querySelectorAll('[data-remove]').forEach((b) => b.addEventListener('click', startRemove));
+}
+
+function startRemove(e) {
+  e.stopPropagation();
+  const cell = e.currentTarget.parentElement;
+  const t = e.currentTarget.dataset.remove;
+  cell.innerHTML = `<span class="pf-confirm">
+    <input aria-label="Quantity to remove" placeholder="all" inputmode="decimal">
+    <button class="btn btn--small btn--danger">Remove</button>
+    <button class="btn btn--small btn--ghost" aria-label="Cancel"><i class="ph ph-x"></i></button></span>`;
+  const [input, confirm, cancel] = cell.querySelectorAll('input, button');
+  input.focus();
+  cancel.addEventListener('click', (ev) => { ev.stopPropagation(); loadPortfolio(); });
+  const go = async (ev) => {
+    ev.stopPropagation();
+    confirm.disabled = true;
+    try {
+      const data = await api('/api/portfolio', { method: 'POST',
+        body: JSON.stringify({ action: 'remove', ticker: t, qty: input.value.trim() || null }) });
+      renderPortfolio(data);
+      toast(input.value.trim() ? `Removed ${input.value.trim()} ${t}` : `Removed ${t}`);
+    } catch (err) {
+      confirm.disabled = false;
+      toast(err.message);
+    }
+  };
+  confirm.addEventListener('click', go);
+  input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') go(ev); if (ev.key === 'Escape') loadPortfolio(); });
+}
+
+$('#pf-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const btn = e.submitter || $('#pf-form button');
+  const body = {
+    action: 'add',
+    ticker: $('#pf-ticker').value.trim().toUpperCase(),
+    qty: $('#pf-qty').value.trim(),
+    cost: $('#pf-cost').value.trim(),
+  };
+  $('#pf-error').textContent = '';
+  btn.disabled = true;
+  try {
+    const data = await api('/api/portfolio', { method: 'POST', body: JSON.stringify(body) });
+    renderPortfolio(data);
+    toast(`Added ${body.qty} ${body.ticker} at ${body.cost}`);
+    e.target.reset();
+    $('#pf-ticker').focus();
+  } catch (err) {
+    $('#pf-error').textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+$('#pf-refresh').addEventListener('click', () => loadPortfolio(true));
+
 // ---------- journal ----------
 async function loadJournal() {
   const box = $('#journal');
@@ -458,7 +581,7 @@ async function loadJournal() {
     const { tickers } = await api('/api/watchlist');
     state.chips = tickers;
     renderChips();
-    if (tickers.length && location.hash !== '#journal') scan();
+    if (tickers.length && !['#journal', '#portfolio'].includes(location.hash)) scan();
   } catch (e) {
     toast(`Couldn't load your saved list: ${e.message}`);
   }

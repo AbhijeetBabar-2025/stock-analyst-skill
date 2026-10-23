@@ -30,6 +30,7 @@
       </a>
       <nav class="tabs" role="tablist">
         <a class="tab" href="#scanner" data-view="scanner" role="tab">Scanner</a>
+        <a class="tab" href="#portfolio" data-view="portfolio" role="tab">Portfolio</a>
         <a class="tab" href="#journal" data-view="journal" role="tab">Journal</a>
       </nav>
       <button class="icon-btn" id="theme" aria-label="Toggle light and dark mode">
@@ -62,11 +63,14 @@
         <div class="summary" id="summary"></div>
         <label class="sort">
           <span class="muted">Sort by</span>
-          <select id="sort">
-            <option value="score">Score</option>
-            <option value="momentum">Momentum</option>
-            <option value="ticker">Symbol</option>
-          </select>
+          <span class="select">
+            <select id="sort">
+              <option value="score">Score</option>
+              <option value="momentum">Momentum</option>
+              <option value="ticker">Symbol</option>
+            </select>
+            <i class="ph-bold ph-caret-down"></i>
+          </span>
         </label>
       </div>
 
@@ -77,6 +81,37 @@
         <h2>Scan your first stock</h2>
         <p>Add symbols above and press Scan. Your list is saved for next time.</p>
       </div>
+    </section>
+
+    <section id="view-portfolio" class="view" hidden>
+      <div class="journal-head">
+        <div>
+          <h1>Portfolio</h1>
+          <p class="muted">What you hold, what it's worth now, and today's score for each.</p>
+        </div>
+        <button class="btn btn--small" id="pf-refresh" type="button"><i class="ph ph-arrows-clockwise"></i> Refresh prices</button>
+      </div>
+
+      <div class="totals" id="pf-totals"></div>
+
+      <form class="panel pf-form" id="pf-form" autocomplete="off" novalidate>
+        <div class="field">
+          <label for="pf-ticker">Symbol</label>
+          <input id="pf-ticker" placeholder="AAPL" spellcheck="false">
+        </div>
+        <div class="field">
+          <label for="pf-qty">Quantity</label>
+          <input id="pf-qty" inputmode="decimal" placeholder="10">
+        </div>
+        <div class="field">
+          <label for="pf-cost">Price paid (each)</label>
+          <input id="pf-cost" inputmode="decimal" placeholder="180.00">
+        </div>
+        <button class="btn btn--primary" type="submit"><i class="ph-bold ph-plus"></i> Add holding</button>
+        <p class="field-error" id="pf-error" role="alert"></p>
+      </form>
+
+      <div class="panel table-wrap" id="pf-table"></div>
     </section>
 
     <section id="view-journal" class="view" hidden>

@@ -3,6 +3,9 @@
 Every change to this skill's behaviour (weights, thresholds, workflow, scripts), newest first.
 
 ## 2026-10-23
+- Dashboard Portfolio tab: add/remove holdings, totals per currency (no mixing), allocation
+  bar, P&L, concentration warning, today's score per holding, click-through to analysis.
+  Tidied controls: one button system, styled select, focus rings, spinner, 36px icon buttons.
 - Dashboard analysis panel: click a card for why it's moving, Google News headlines,
   bull/bear cases, levels to watch, cautions, research gaps, learning-only trading
   practices (`scripts/brief.py`) and the newest saved report. Report mode now saves

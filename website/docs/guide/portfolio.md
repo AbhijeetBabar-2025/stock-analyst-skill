@@ -6,6 +6,10 @@ title: Portfolio tracker
 
 Keep track of what you own and how it's doing.
 
+:::tip Prefer clicking?
+The [dashboard](./dashboard#portfolio) has a Portfolio tab with the same holdings, plus an allocation bar and today's score for each one.
+:::
+
 ## Add what you bought
 
 Just tell Claude:

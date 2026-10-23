@@ -31,7 +31,7 @@ Personal data lives in `~/.stock-analyst/` (`$D`), outside the skill, so updates
 | "show my journal", "what did we say about X" | `uv run $S/scripts/journal.py list [TICKER]` |
 | "how did our calls do", "review" | **Review** (below) |
 | "lower the weight of X", "I care less about Y" | Write just that change to `$D/config.json`, then log it in `$D/changes.md` |
-| "open the dashboard", "show me in the browser" | Start `uv run $S/scripts/dashboard.py --open` in the background and give the user http://127.0.0.1:8787 (stop it when they're done) |
+| "open the dashboard", "show me in the browser", "show my portfolio in the browser" | Start `uv run $S/scripts/dashboard.py --open` in the background and give the user http://127.0.0.1:8787 (stop it when they're done) |
 | "update the skill", "check for upstream changes" | **Upstream** (below) |
 
 **Report mode details:** search the web for current price, latest quarterly results, guidance, news and peers; check them against the script's numbers. Read `references/fundamental-analysis.md`, `technical-analysis.md` and `financial-metrics.md` only as needed. Use the script's score as one input, and when your judgement differs from it, say so and explain why. Always cite sources with dates. Keep the report as long as the profile says the user likes. Save the finished report as Markdown to `$D/reports/TICKER-YYYY-MM-DD.md` (e.g. `GLD-2026-10-23.md`); the dashboard's detail panel shows the newest one for each ticker.

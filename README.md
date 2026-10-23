@@ -7,7 +7,7 @@ A stock analyst skill for Claude Code and other AI agents. It learns how you inv
 - **Quick score:** a -100 to +100 score for any Yahoo Finance ticker (US, India `.NS`/`.BO`, London `.L`, crypto `-USD`). It combines 7 factors: valuation, growth, profitability, financial health, momentum, analyst views and earnings surprises.
 - **Full report:** fundamental and technical research with bull and bear cases, valuation and risks, using live web research.
 - **ETFs:** funds (GLD, SPY, TLT, NIFTYBEES.NS) get their own score from momentum, track record, risk, cost and liquidity, and are compared with the right index for their asset class.
-- **Dashboard:** a local web page to type in symbols, see each result as a card, save a watchlist and track past calls. Click a card for the full analysis: why it's moving, latest headlines, bull and bear cases, what to watch, cautions, research gaps, learning-only trading notes and Claude's saved report. Run `uv run ~/.claude/skills/stock-analyst/scripts/dashboard.py --open`.
+- **Dashboard:** a local web page to type in symbols, see each result as a card, save a watchlist and track past calls. Click a card for the full analysis: why it's moving, latest headlines, bull and bear cases, what to watch, cautions, research gaps, learning-only trading notes and Claude's saved report. A Portfolio tab shows holdings with totals per currency, allocation, profit/loss and today's score. Run `uv run ~/.claude/skills/stock-analyst/scripts/dashboard.py --open`.
 - **Comparison:** puts several tickers side by side and ranks them.
 - **Portfolio tracker:** your holdings with profit/loss and warnings when one holding is too large.
 - **Memory that improves over time:**

@@ -34,6 +34,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 import journal
+import portfolio
 from brief import build_brief
 from common import DATA_DIR, SKILL_DIR, load_config
 
@@ -163,6 +164,79 @@ def latest_report(ticker: str) -> dict | None:
     return {"date": files[-1].stem[len(ticker) + 1:], "markdown": files[-1].read_text()}
 
 
+def portfolio_view(holdings: dict, quotes: dict, errors: dict) -> dict:
+    """Rows with value, P&L and weight, plus totals per currency (never mixed).
+
+    Weights are within each currency, since there is no exchange rate here.
+    """
+    rows = []
+    for t, h in holdings.items():
+        q = quotes.get(t)
+        cost = h["qty"] * h["avg_cost"]
+        row = {"ticker": t, "qty": h["qty"], "avg_cost": h["avg_cost"], "cost": cost,
+               "price": None, "value": None, "pnl": None, "pnl_pct": None, "weight": None,
+               "concentrated": False, "currency": None, "error": errors.get(t)}
+        if q and q.get("price"):
+            value = h["qty"] * q["price"]
+            row.update({k: q.get(k) for k in ("name", "currency", "verdict", "score", "asset_type")})
+            row.update({"price": q["price"], "value": value, "pnl": value - cost,
+                        "pnl_pct": value / cost - 1 if cost else None})
+        rows.append(row)
+
+    totals: dict[str, dict] = {}
+    for row in rows:
+        if row["value"] is None:
+            continue
+        t = totals.setdefault(row["currency"] or "?", {"value": 0.0, "cost": 0.0, "pnl": 0.0, "count": 0})
+        t["value"] += row["value"]
+        t["cost"] += row["cost"]
+        t["pnl"] += row["pnl"]
+        t["count"] += 1
+    for cur, t in totals.items():
+        totals[cur] = {"value": t["value"], "cost": t["cost"], "pnl": t["pnl"],
+                       "pnl_pct": t["pnl"] / t["cost"] if t["cost"] else None, "count": t["count"]}
+    for row in rows:
+        if row["value"] is not None:
+            group = totals[row["currency"] or "?"]
+            row["weight"] = row["value"] / group["value"] if group["value"] else None
+            row["concentrated"] = group["count"] > 1 and (row["weight"] or 0) > portfolio.CONCENTRATION_LIMIT
+
+    def order(row):
+        cur = row["currency"] or "~"
+        return (row["value"] is None, cur != "USD", cur, -(row["value"] or 0))
+
+    rows.sort(key=order)
+    return {"rows": rows, "totals": totals}
+
+
+def parse_trade(body: dict) -> tuple[str, str, float | None, float | None]:
+    """Validate a portfolio change from the page. Raises ValueError with a readable message."""
+    action = body.get("action")
+    if action not in ("add", "remove"):
+        raise ValueError("Unknown action; use add or remove")
+    ok, _ = parse_tickers(str(body.get("ticker", "")))
+    if not ok:
+        raise ValueError("Enter a valid symbol, e.g. AAPL or RELIANCE.NS")
+
+    def number(key, required):
+        raw = body.get(key)
+        if raw in (None, ""):
+            if required:
+                raise ValueError(f"Enter the {'quantity' if key == 'qty' else 'price paid'}")
+            return None
+        try:
+            v = float(raw)
+        except (TypeError, ValueError):
+            raise ValueError(f"{'Quantity' if key == 'qty' else 'Price paid'} must be a number") from None
+        if not math.isfinite(v) or v <= 0:
+            raise ValueError(f"{'Quantity' if key == 'qty' else 'Price paid'} must be more than zero")
+        return v
+
+    if action == "add":
+        return "add", ok[0], number("qty", True), number("cost", True)
+    return "remove", ok[0], number("qty", False), None
+
+
 def load_watchlist() -> list[str]:
     if not WATCHLIST.exists():
         return []
@@ -225,6 +299,22 @@ def detail(ticker: str) -> dict:
     news, news_error = fetch_news(news_query(m["name"], ticker, m.get("asset_type", "stock")))
     return {"ticker": ticker, "ok": True, "metrics": m, "result": r, "brief": build_brief(m, r),
             "news": news, "news_error": news_error, "report": latest_report(ticker)}
+
+
+def portfolio_data() -> dict:
+    holdings = portfolio.load()
+    if not holdings:
+        return {"rows": [], "totals": {}}
+    quotes, errors = {}, {}
+    for s in scan(list(holdings)):
+        if s["ok"]:
+            m, r = s["metrics"], s["result"]
+            quotes[s["ticker"]] = {"price": m["price"], "currency": m.get("currency") or "?",
+                                   "name": m.get("name"), "asset_type": m.get("asset_type"),
+                                   "verdict": r["verdict"], "score": r["composite"]}
+        else:
+            errors[s["ticker"]] = s["error"]
+    return portfolio_view(holdings, quotes, errors)
 
 
 def scan(tickers: list[str]) -> list[dict]:
@@ -315,6 +405,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self._send(200, detail(ok[0]))
             if url.path == "/api/watchlist":
                 return self._send(200, {"tickers": load_watchlist()})
+            if url.path == "/api/portfolio":
+                return self._send(200, portfolio_data())
             if url.path == "/api/journal":
                 rows, notes = journal_view()
                 return self._send(200, {"rows": rows, "notes": notes,
@@ -330,6 +422,18 @@ class Handler(BaseHTTPRequestHandler):
             body = self._body()
             if self.path == "/api/watchlist":
                 return self._send(200, {"tickers": save_watchlist(list(body.get("tickers", [])))})
+            if self.path == "/api/portfolio":
+                action, ticker, qty, cost = parse_trade(body)
+                holdings = portfolio.load()
+                if action == "add":
+                    portfolio.add(holdings, ticker, qty, cost)
+                else:
+                    try:
+                        portfolio.remove(holdings, ticker, qty)
+                    except KeyError:
+                        raise ValueError(f"{ticker} isn't in your portfolio") from None
+                portfolio.save(holdings)
+                return self._send(200, portfolio_data())
             if self.path == "/api/journal":
                 ok, _ = parse_tickers(str(body.get("ticker", "")))
                 price = float(body.get("price") or 0)
