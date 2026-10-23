@@ -2,7 +2,9 @@
 
 A stock analyst skill for Claude Code and other AI agents. It learns how you invest and improves from its own track record.
 
-📖 **[Beginner's installation and user guide](https://abhijeetbabar-2025.github.io/stock-analyst-skill/)** · 🎬 **[Demo video](demo/stock-analyst-demo.mp4)**
+📖 **[Beginner's installation and user guide](https://abhijeetbabar-2025.github.io/stock-analyst-skill/)** · 
+
+🎬 
 
 <a href="https://abhijeetbabar-2025.github.io/stock-analyst-skill/video/stock-analyst-demo.mp4">
   <img src="website/static/video/stock-analyst-demo-preview.gif" width="100%" alt="Demo: typing tickers into the Stock Analyst dashboard, scanning them into score cards, opening GLD's analysis panel, then the portfolio and journal tabs">
